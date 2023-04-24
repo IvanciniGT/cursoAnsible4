@@ -1,0 +1,175 @@
+# YAML: Es un lenguaje para estructurar información, equivalente a lo que sería: JSON, CSV, XML
+# En YAML una gracia es que a diferencia de otros lenguajes de este tipo, como CSV o JSON, puedo poner COMENTARIOS!
+# ALELUYA !!!!!!, con el cuadradito....
+
+# Otra gracia de YAML... en un único fichero YAML puedo tener MULTIPLES DOCUMENTOS YAML
+# Para anotar el comienzo de un documento, usamos Tres guiones ---
+---
+# En el primer documento no se ponen los 3 guiones
+# Para anotar que un documento acaba, se usan 3 puntos ...
+...
+# Puede pasar mucho tiempo vía streaming... que es cuando esto tiene sentido
+---
+# Los 3 puntos: ... de final de documento son opcionales. Rara vez los vereis.
+# Un documento de YAML Es *UN* NODO a primer nivel
+# En YAML hay 2 tipos de nodos: ESCALARES y COLECCION
+# Nodos escalares son valores sueltos: NUMERO, TEXTO, FECHA, VALOR LOGICO
+# Nodos de colección, son nodos que tiene dentro MAS NODOS.
+---
+# Nodos escalares I: NUMEROS
+3
+---
+-5
+---
+9.8
+---
+-.inf
+---
+.INF
+---
+.nan
+---
+17
+---
+33
+---
+# Nodos escalares II: VALORES LOGICOS
+true  # True TRUE
+---
+false # False FALSE
+---
+# NOTA: Estamos en la spec de YAML 1.2
+# En versión 1.1 se permitían otros valores como valores lógicos... a saber:
+on # Y sus variantes
+off
+yes
+no
+y
+n
+# Lo hicieron muy mal en la spec de YAML al quietar en v1.2 estos valores. Debían haberlo marcado como OBSOLETO ! (deprecated)
+# Pero no lo hicieron... AQUELLO FUE CAOTICO... 
+# La mayor parte de los parsers (programas que leen un lenguaje X) de YAML siguen a día de hoy adminitiendo parte o todos esos valores...
+# SI EN ALGUN MOMENTO ENCONTRAIS EJEMPLOS DE PLAYBOOKS (y los encontrareis en google) con esos valores... 
+# LOS QUITO CORRIENDO y pongo true o false
+# No se en que momento dejarán de funcionar.... a día de hoy YA ESTAN FUERA DE LA SPEC!
+---
+# Nodos escalares II: Textos
+# Los textos en YAML son muy COMPLEJOS !!!! Los más complejo de YAML con diferencia
+Puedo 
+
+"escribir 'un \ \n \t #texto
+---
+# Bueno...
+"Puedo 
+
+\"escribir 'un \\ \n \t #texto"
+---
+# Bueno...
+'Puedo 
+
+"escribir ''un \ \n \t #texto'
+---
+# En la practica: Solo usamos estas sintaxis... para textos MUY SIMPLES.
+# Y es que en YAML hay otras 2 sintaxis más para textos.
+---
+# Sintaxis literal
+|3+
+     Empiezo a escribir un texto
+    Que lleve dentro lo que quiera, como
+    comillas: " ' # \, lo que quiera
+    
+    Con saltos de linea dentro... los que quiera
+        Y más aún
+        
+        
+        
+        
+---
+# Sintaxis folded
+# Casi igual a la literal, salvo que se usa > en lugar de |
+>
+    Empiezo a escribir un texto
+    Que lleve dentro lo que quiera, como
+    comillas: " ' # \, lo que quiera
+    
+    Con saltos de linea dentro... los que quiera
+        Y más aún
+
+    docker
+        compose
+        down
+        -v 
+
+---
+# Hay más nodos de tipos escalar: fechas (ISO), nulos (~)
+---
+# Además de nosos escalares, tenemos los de colección.
+# En YAML HAY MUCHOS:
+# Listas ordenadas.  *** Los únicos que se usan en ANSIBLE !
+# Mapas desordenados ***
+# Listas desordenadas
+# Mapas ordenados
+#...
+---
+# Lista ordenada: Es un conjunto de NODOS, donde cada nodo va en una linea precedido de un guion y al menos un espacio en blanco.
+- item 1
+- item 2
+- 3
+- true
+-   
+    - subitem 1
+    - subitem 2
+-   - subitem 1
+    - subitem 2
+-   subclave1: true
+    subclave2: 5
+-   
+    subclave1: true
+    subclave2: 5
+---
+# Hay otra sintaxis alternativa a esta en YAML para las listas:
+["item1", "item2", 3, true] # Os suena esta sintaxis? JSON,.... De hecho en la spec 1.2 de YAML se ha incluido dentro la spec JSON
+---
+["item1", "item2", 3, false]
+# JSON es un subconjunto de YAML.... YAML se ha comido literalmente a JSON
+# Esta segunda ESTA ESTRICTAMENTE PROHIBIDA ! por dos motivos:
+# - YAML va orientado a seres humanos.... y la primera es más legible para seres humanos
+# - En nuestro caso concreto (ANSIBLE)... y en muchos otros (KUBERNETES, GITLAB CI/CD), estos documentos se van a guardar en un repo de GIT
+# Los sietmas de control de código fuenta IDENTIFICAN CAMBIOS A NIVEL DE LINEA DE TEXTO
+# Solo habrá un escenario donde la segunda sea imperativa ! Obligatoria:
+# Para repreaentar una lista vacia 
+---
+[]
+---
+# Por último, para nosotros, tenemos los MAPAS DESORDENADOS.
+# Son un conjunto de nodos, donde cada nodo viene identificado por una clave
+clave1: valor1
+clave2: valor 2
+clave3: 3
+clave4: true
+clave5:
+    - subitem 1
+    - subitem 2
+clave6:
+    subclave1: 1
+    subclave2: 33
+---
+clave1: valor1
+clave5:
+        - subitem 1
+        - subitem 2
+clave6:
+    subclave1: 1
+    subclave2: 33
+clave2: valor 2
+clave3: 3
+clave4: true
+---
+# Hay una sintaxis alternativa a los mapas desordados:
+
+{ "clave1": "valor1", "clave2": 33 } # Anda!!! pero si se parece a JSON también
+# Qué sintaxis nos gusta más, por razones ya mencionadas? LA PRIMERA
+---
+# Aunque la segunda me viene de perlas cuando quiero representar? UN MAPA VACIO
+{}
+---

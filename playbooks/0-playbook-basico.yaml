@@ -1,0 +1,44 @@
+# Esto va a ser un playbook... es decir, un listado de PLAYs
+# El playbook será una lista YAML... cada PLAY un item de esa lista
+# - # PLAY 1
+# - # PLAY 2
+
+
+-   # Nuestro primer play. Un play es un mapa desordenado YAML.
+    # Aunque debe llevar una serie de claves que define ANSIBLE
+    hosts:      localhost   # Aquí pondremos los hosts sobre los que vamos a ejecutar las tareas del script
+                            # Realmente en el futuro os diré que esto es mentira !!!!!!!!
+    gather_facts:   true    # Por defecto, ANSIBLE, al comenzar la ejecución
+                            # de un script ejecuta una tarea llamada GATHER FACTS
+                            # ESO NO QUEREMOS NUNCA JAMAS QUE OCURRA !!!!! EN NINGUN CASO !
+                            # Bueno... hoy y mañana SI ;)
+                            # Esta tarea obtiene información del entorno 
+                            # remoto sobre el que vamos a ejecutar tareas
+                            # INFORMACION !!!! LA HUEVA DE INFORMACION !!!!
+                            # Esa información se almacena (deposita)
+                            # En una variable estándar de ansible, llamada:
+                            #   ansible_facts
+    tasks:  # Tareas que queremos ejecutar.... MAL !!!!! MUY MAL LLamado esto tareas... ANSIBLE MAL !!! NO
+            # Este elemento debería haberse llamado ESTADOS ... o algo así
+
+        -   # Tarea 1. Cada tarea tendrá: 
+                # Un nombre. REALMENTE ES OPCIONAL... pero SE LO PONEMOS
+                # Un modulo. El módulo podrá requerir de configuración. ESPECIFICA DE CADA MODULO (DOCU)
+            name:       Tarea 1
+            debug: # Modulo que imprime tristen mensajes por consola
+                msg:    Soy la tarea 1 que se está ejecutando !!!!!
+
+        -   name:       Tarea 2
+            debug: 
+                msg:    Soy la tarea 2 que se está ejecutando !!!!!
+
+        -   
+            name:       Tarea 3
+            debug: 
+                msg:    Soy la tarea 3 que se está ejecutando !!!!!
+        
+        -   
+            name:       Tarea 4
+            debug: 
+                var:    ansible_facts
+        
