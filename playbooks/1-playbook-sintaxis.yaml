@@ -1,0 +1,287 @@
+-   hosts:      localhost
+    gather_facts:   false
+    
+    vars:   # Dentro de vars, ponemos un MAPA / DICCIONARIO YAML, donde cada clave se interpreta como el nombre de una variable
+            # Y los valores del MAPA como los valores de las variables
+        variable1: Felipe
+        variable2: 2
+        variable3: true
+        variable4:
+            - item1
+            - item2
+        variable5:
+            clave1: valor1
+            clave2: 2
+    # AQUI NUNCA VAMOS A DEFINIR VARIABLES = MALA PRACTICA
+    
+    # Esta división de tareas es una división a nivel CONCEPTUAL
+    
+    ## Aquí pondremos tareas que son necesarias para la ejecución del playbook... pero
+    ## que no son el objeto principal del playbook
+    pre_tasks:
+        -   name:       Tarea 1
+            debug: 
+                msg:    Soy una tarea que se está ejecutando
+        
+        ###################### Usando variables ###########################################
+        -   name:       Acceder al dato asociado/almacenado en una variable
+            debug:
+                var:    variable2   # El módulo me regala las llaves de JINJA =>  {{ variable2 }}
+            ## Esto vale para poco... solo sacar el valor de una variable por pantalla... 
+            ## En ansible, todos los textos que se pasen como valores de cualquier elemento, se INTERPRETAN COMO PLANTILLAS JINJA !!!!!
+    ## Aquí meteremos las tareas PRINCIPALES / OBJETO de mi playbook
+        -   name:       Mostrar por pantalla un texto
+            debug:
+                msg: |-
+                            Hola, soy una plantilla JINJA!!!!
+                            Tú como te llamas?
+                                Yo me llamo: {{ variable1 }}
+                                Y yo me llamo: {{ variable2 }}
+                                Y yo me llamo: {{ variable3 }}
+                                Y yo me llamo: {{ variable4 }}
+                                Y yo me llamo: {{ variable4[0] }}
+                                Y yo me llamo: {{ variable5['clave1'] }}
+                                Y yo me llamo: {{ variable5.clave1 }}
+                                
+                                Voy a echar unas sumas: {{ variable2 + variable2 * 5 }}
+                                
+        -   name:       "Más sitios donde definir variables: EN UNA TAREA"
+            debug:
+                msg: |-
+                            Yo defino mi propio valor para variable 1
+                                Yo me llamo: {{ variable1 }}
+            vars:
+                variable1:  Lucas
+            # NOTA: Las variables definidas dentro de una tarea, solo viven dentro de la tarea
+            #       Su SCOPE (ambito) es la tarea
+            # Este escenario es un poco raro... pero tiene su uso: QUE YA OS CONTARÉ
+
+        -   name:       "Saco de nuevo variable 1"
+            debug:
+                msg: |-
+                                Yo me llamo: {{ variable1 }}
+    tasks:
+        ###################### Estados de ejecución de una tarea ###########################
+
+        -   name:       Tarea que ejecuta un trabajo
+            debug: 
+                msg:    Soy una tarea que se está ejecutando
+            # Necesitaríamos identificar el resultado de ejecución de este MODULO con un nombre
+            register:   tarea_ejecutora # Que lo que se guarda es el RESULTADO DE LA EJECUCION
+            
+        -   name:       Tarea que muestra el estado de ejecución de la tarea anterior
+            debug: 
+                var:    tarea_ejecutora.failed
+
+        -   name:       Tarea que explota !
+            debug: 
+                msg:    Exploto, exploto, explotó !
+            failed_when: true
+                            # Aqui dentro ponemos una expresion python, que de devolver:
+                            # true, se considerará que la tarea ha fallado
+                            # false, se condiderará que la tarea no ha fallado
+                            # En este caso, ocurre lo mismo que con el atributo var del modulo debug
+                            # NO HACE FALTA PONER LAS LLAVES
+            # Por defecto si una tarea falla, deja de ejecutar el playbook
+            # A no ser que... le diga que pase del tema
+            ignore_errors:  true
+            # Esto es algo poco habitual... ya veremos en un rato una opción mejor para la gestión de errores
+
+        -   name:       Tarea que provoca cambio !
+            debug: 
+                msg:    Cambio, cambio, cambió !
+            changed_when: true # Cuando debe considerarse que esta tarea ha provocado cambios
+                                # Mismo comportamiento que failed_when
+            
+        -   name:       Tarea más especial !
+            shell: 
+                cmd:    echo HOLA CARA-BOLA
+            # Que ha pasao????
+            # He sacado un triste mensaje ... y me dice que esto provoca cambios.
+            # Y eso? 
+            # Quién informa a Ansible de si una tarea ha fallado o ha provocado cambios?
+            #   EL MODULO... CADA MODULO
+            # Yo puedo influir en ello.. con los atributos changed_when y failed_when...
+            # Pero si no lo hago, por defecto es RESPONSABILIDAD DEL MODULO
+            #   El modulo debug, siempre informa de que:
+            #       - No hay error
+            #       - No hay cambio
+            #   El modulo shell, informa de que:
+            #       - Siempre se provoca cambio
+            #       - Hay error si? El codigo de respuesta es distinto de cero
+        -   name:       Tarea más especial para crear un directorio!
+            shell: 
+                cmd: |
+                        if [ -f ./directorio ]; then
+                            exit 1
+                        elif [ ! -d ./directorio ]; then
+                            mkdir directorio
+                            exit 99
+                        fi
+            register: salida
+            changed_when: salida.rc == 99
+            failed_when:  salida.rc != 99 and salida.rc != 0
+            # Evidentemente esto no lo haríamos nunca así... 
+            # Para eso me quedo en la bash... 
+            # Lo haríamos con el modulo "file" que ya me da la idempotencia
+            
+            # Desgraciadamente, en ocasiones queremos hacer cosas más complejar que crear 
+            # un directorio... Y no hay modulo... y me toca cerdear !!!!!!
+            # Ya veis como cerdeamos ;)
+        ###################### Ejecutar condicionalmente una tarea ###########################
+        -   name:       Tarea que se ejecuta condicionalmente !
+            debug: 
+                msg:    Me ejecuto... o no !!!!
+            when:       #    false
+                        #    variable3
+                        #    not salida.failed
+                        #    salida is failed
+                        salida is success # changed, skipped
+                        # Aqui ponemos una expresion python... SIN LLAVES que ya me las regala
+                        # Si devuelve true la tarea se ejecuta
+                        # Si devuelve false, la atarea no se ejecuta
+                        
+        -   name:       Tarea 1
+            debug: 
+                msg:    Soy una tarea que se está ejecutando
+                
+        -   name:       Tarea que invocará a un handler 1!
+            debug: 
+                msg:    Yo voy a invocar al handler 1
+            notify:     Handler 1   # Me permite invocar un handler
+            # El handler solo se invoca, si esta tarea PROVOCA CAMBIO!
+            changed_when:   true
+            # Una tarea puede ACTIVAR un handler
+
+        -   name:       Tarea que también invocará a un handler 1!
+            debug: 
+                msg:    Yo voy a invocar al handler 1
+            notify:     Handler 1   # Me permite invocar un handler
+            # El handler solo se invoca, si esta tarea PROVOCA CAMBIO!
+            changed_when:   true
+            # Una tarea puede ACTIVAR un handler
+            # PERO... NUNCA LOS USAMOS ASI NUNCA JAMAS !!!!!!!!!!
+            # Vamos a trabajar de otra forma... Mediante un patrón: LISTENER
+            # Esta SI ES LA FORMA DE TRABAJAR CON HANDLERS
+            # Que me ofrece un patron LISTENER? 
+            # DESACOPLAR TAREAS
+            # T1 -> HA                  RUINA... tareas acopladas
+            # T1 -> EVENTO X <- HA      GUAY ... tareas desacopladas
+            # ESTO FACILITA MUCHO MUCHO MUCHISIMO el mantenimiento del PLAYBOOK
+        -   name:       Tarea que invocará a otro handler 2!
+            debug: 
+                msg:    Yo voy a invocar al Federico 2
+            notify:     Federico 2 # = PROHIBIDO ! Usar eventos en su lugar !
+            
+        -   name:       Tarea que lanza un evento!
+            debug: 
+                msg:    Lanzo el evento HAY_CAMBIO_CONFIGURACION
+            notify:     HAY_CAMBIO_CONFIGURACION
+            changed_when: true
+        
+            # Las tareas pueden llevar ETIQUETAS
+            # Y en esa frase cambiar el pueden por SIEMPRE DEBEN 
+        -   name:       Tarea con tags !
+            debug: 
+                msg:    Tarea de instalacion            
+            tags:
+                - instalacion
+        
+        -   name:       Otra tarea con tags !
+            debug: 
+                msg:    Tarea de configuracion e instalacion            
+            tags:
+                - instalacion
+                - configuracion
+            # Esos tags los puedo controlar al ejecutar un playbook.
+            # Puedo solicitar que:
+            # - SE EJECUTEN LOS TASKS que tengan por TAG uno en concreto
+            #       $ ansible-playbook PLAYBOOK --tags "instalacion"
+            # - SE EJECUTEN LOS TASKS que NO tengan por TAG uno en concreto
+            #       $ ansible-playbook PLAYBOOK --skip-tags "instalacion"
+
+        -   name:       Tarea última del bloque TASKS !
+            debug: 
+                msg:    Acabamos las tareas            
+
+    ## Aquí metemos tareas que quiero realizar ... pero que no son el objetivo principal del playbook...
+    ## Aunque hay que realizarlas: Pruebas, Notificaciones
+    post_tasks:
+        -   name:       Tarea 1 de las postareas
+            debug: 
+                msg:    Soy una tarea que se está ejecutando
+    
+        -   name:       Tarea que también invocará a un handler 1!
+            debug: 
+                msg:    Yo voy a invocar al handler 1
+            notify:     Handler 1   # Me permite invocar un handler
+            # El handler solo se invoca, si esta tarea PROVOCA CAMBIO!
+            changed_when:   true
+            # Una tarea puede ACTIVAR un handler
+            
+        ###################### Bloques de tareas ###########################
+        # En ansible, podemos crear una estructura jerárquica de tareas. 
+        # Por ahora tenemos la siguiente estructura en el play:
+        #    PLAY
+        #       |- pre_tasks
+        #       |        - Lista de Tareas
+        #       |- tasks
+        #       |- post_tasks
+        #      (|- handlers)
+        
+        -   name:   Bloque de tareas
+            block:
+                -   name:   Tarea 1 del bloque
+                    debug: 
+                        msg:    Soy la tarea 1 del bloque
+                -   name:   Tarea 2 del bloque
+                    debug: 
+                        msg:    Soy la tarea 2 del bloque
+                    failed_when: true
+                -   name:   Tarea 3 del bloque
+                    debug: 
+                        msg:    Soy la tarea 3 del bloque
+            # El bloque aporta varias cosas:
+            # Posibilidad de definir atributos en el bloque que aplican a todas las tareas que hay dentro
+            when: variable3
+            # Controlar ERRORES... el block, actua como un TRY:
+            # Asociado a un block, puedo definir un RESCUE: (equivalente a un except de python)
+            rescue:
+                -   name:   Tarea 1 del rescue
+                    debug: 
+                        msg:    Soy la tarea 1 del rescue
+                -   name:   Tarea 2 del rescue
+                    debug: 
+                        msg:    Soy la tarea 2 del rescue
+            # Tambien podemos poner un ALWAYS (sería el finally de python)
+            always:
+                -   name:   Tarea 1 que se ejecuta siemrpe
+                    debug: 
+                        msg:    Soy la tarea 1 que se ejecuta siempre
+                -   name:   Tarea 2 que se ejecuta siemrpe
+                    debug: 
+                        msg:    Soy la tarea 2 que se ejecuta siempre
+            
+
+            
+            
+    # Los handlers son tareas que se ejecutan cuando son invocados por otra tarea
+    # Un handler se ejecutará cuando:
+    #   - Haya sido activado (notify + changed)
+    #   - Al final de las tareas del bloque donde esté la tarea que activa
+    #   - Un handler solo se ejecuta 1 vez... por bloque... aunque haya sido activado varias veces en ese bloque
+    #       Por qué ese comportamiento? POR LA IDEMPOTENCIA !
+    handlers:
+        -   name:       Handler 1
+            debug: 
+                msg:    Soy el handler 1... haciendo de las mias !!!!
+            listen:
+                - HAY_CAMBIO_CONFIGURACION
+                - HAY_NUEVA_VERSION
+
+        -   name:       Federico 2
+            debug: 
+                msg:    Soy el handler 2... haciendo de las mias !!!!    
+            listen:
+                - HAY_CAMBIO_CONFIGURACION
+                
