@@ -136,6 +136,10 @@ Las sentencias contienen:                   SINTAGMAS
             register:
             notify:
             ignore_errors:
+            
+            delegate_to:
+            became:
+            loop:
         
         -   block:
             rescue:

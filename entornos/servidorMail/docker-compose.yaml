@@ -1,6 +1,6 @@
 version: "2"
 
-service:
+services:
     my-email-server:                    
         image:                          mailhog/mailhog
         container_name:                 mailhog
