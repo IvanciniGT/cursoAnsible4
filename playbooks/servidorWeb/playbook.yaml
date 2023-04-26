@@ -30,38 +30,38 @@
                       - always  # Este es un tag especial de ANSIBLE
             
         -   name:       Asegurar que estamos en un entorno ubuntu
-                        # Detengo el PLAY para el host
+                        # Detengo el PLAY para el host                  (META)
             when:       # si la máquina NO ES UBUNTU [sistema_operativo]
             tags:
                       - always  # Este es un tag especial de ANSIBLE
         
-        -   name:       Asegurar que git queda instalado en el entorno
+        -   name:       Asegurar que git queda instalado en el entorno  (APT)
                         # Si no esté git... pues ya sabes FELIPE !
             tags:
                       - despliegue
 
     tasks:
     
-        -   name:       Asegurar que NGINX queda instalado en el entorno
+        -   name:       Asegurar que NGINX queda instalado en el entorno (APT)
                         # Si no lo está... pues ya sabes FELIPE !
                         # [nginx.version]
             tags:     
                       - instalacion
                       
-        -   name:       Asegurar que NGINX queda configurado como necesito para mi web
+        -   name:       Asegurar que NGINX queda configurado como necesito para mi web (TEMPLATE)
                         # Si no lo está... pues ya sabes FELIPE !
                         # [nginx.puerto , nginx.carpeta]
             notify:     REINICIO_REQUERIDO
             tags:     
                       - configuracion
 
-        -   name:       Asegurar que la carpeta para la web está creada
+        -   name:       Asegurar que la carpeta para la web está creada         (FILE)
                         # Si no esté git... pues ya sabes FELIPE !
                         # [web.carpeta]
             tags:
                       - despliegue
 
-        -   name:       Asegurar que la última versión del repo está descargada en la carpeta
+        -   name:       Asegurar que la última versión del repo está descargada en la carpeta (GIT)
                         # Si no esté git... pues ya sabes FELIPE !
                         # [web.carpeta]
                         # [web.repo]
@@ -69,7 +69,7 @@
             tags:
                       - despliegue
 
-        -   name:       Asegurar que el servidor web queda arrancado
+        -   name:       Asegurar que el servidor web queda arrancado (SERVICE)
                         # Si no esté git... pues ya sabes FELIPE !
             register:   arranque
             tags:
@@ -80,19 +80,19 @@
         -   name:           Validaciones finales
             block:
             
-              - name:       Asegurarme que el servidor web está arrancado
+              - name:       Asegurarme que el servidor web está arrancado (SHELL con un ps)
                             # Miro el proceso a ver si está corriendo
                 tags:
                           - pruebas
                           - always
                           
-              - name:       Asegurar que el servidor web ha abierto el puerto adecuado
+              - name:       Asegurar que el servidor web ha abierto el puerto adecuado (WAITFOR)
                             # puerto 
                 tags:
                           - pruebas
                           - always
                           
-              - name:       Asegurar que el servidor web sirve la web en ese puerto
+              - name:       Asegurar que el servidor web sirve la web en ese puerto  (URI)
                             # curl http://localhost:PUERTO/RUTA 
                             #   CODIGO DE RESPUESTA HTTP 200
                             #   SALIDA DONDE PUEDO YO IDENTIFICAR QUE LA WEB ESTA EN MARCHA
@@ -101,7 +101,7 @@
                           - pruebas
                           - always
                           
-              - name:       Asegurar que la web está en funcionamiento desde fuera del host remoto
+              - name:       Asegurar que la web está en funcionamiento desde fuera del host remoto (URI)
                             # curl http://DIRECCION:PUERTO/RUTA -> 
                             #   CODIGO DE RESPUESTA HTTP 200
                             #   SALIDA DONDE PUEDO YO IDENTIFICAR QUE LA WEB ESTA EN MARCHA
@@ -111,17 +111,17 @@
                           - always
                           
             rescue:
-              - name:       Enviar email en caso de fallo
+              - name:       Enviar email en caso de fallo (MAIL)
                 tags:
                           - notificacion
                           
-              - name:       Dar el playbook por fallido
+              - name:       Dar el playbook por fallido (META)
                 tags:
                           - always
                           
     handlers:
     
-        -   name:       Asegurar que nginx queda reiniciado
+        -   name:       Asegurar que nginx queda reiniciado (SERVICE)
                         # Reinicia nginx... por el articulo 33
             when:       arranque is not changed
             listen:

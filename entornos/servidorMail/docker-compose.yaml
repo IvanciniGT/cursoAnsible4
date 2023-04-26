@@ -1,0 +1,11 @@
+version: "2"
+
+service:
+    my-email-server:                    
+        image:                          mailhog/mailhog
+        container_name:                 mailhog
+        ports:
+                                      - 1025:1025   # smtp
+                                      - 8081:8025
+
+# docker compose up
