@@ -57,6 +57,11 @@
         -   name:       Tarea que muestra cada programa con su puerto
             debug:
                 msg: |
-                        Soy el programa: ????? y tengo el puerto: ????
+                        Soy el programa: {{ item.nombre }} y tengo el puerto: {{ item.puerto }}
                 
-            loop: "{{ programas_lista_de_mapas }}"            
+            loop: "{{ programas_lista_de_mapas }}"
+            # Tengo una variable llamada:  item
+            # Cuya esctura será?
+            #    item:
+            #        nombre: nginx
+            #        puerto: 80
