@@ -40,7 +40,7 @@
                     
         -   name:       Asegurar que tengo los repos de apt actualizados
             apt:
-                update_cache: true
+                update_cache:   true
             changed_when:       false
             tags:
                       - despliegue
@@ -105,16 +105,14 @@
                 changed_when:   false
                 tags:
                           - pruebas
-                          - always
-                          
+
               - name:       Asegurar que el servidor web ha abierto el puerto adecuado
                 wait_for:
                     port:   "{{ web.puerto }}"
                     timeout: 60
                 tags:
                           - pruebas
-                          - always
-                          
+
               - name:       Asegurar que el servidor web sirve la web en ese puerto
                 uri:
                     url:    "http://localhost:{{ web.puerto }}/{{ item.end_point }}"
@@ -126,8 +124,7 @@
                 loop:       "{{ web.tests }}" # A cada elemento le da el nombre de variable "item"
                 tags:
                           - pruebas
-                          - always
-                          
+
               - name:       Asegurar que la web está en funcionamiento desde fuera del host remoto
                 uri:
                     url:    "http://{{ web.dominio }}:{{ web.puerto }}/{{ item.end_point }}"
@@ -138,6 +135,7 @@
                 loop:       "{{ web.tests }}"
                 tags:
                           - pruebas
+                          - monitorizacion
                           - always
 
             rescue:
