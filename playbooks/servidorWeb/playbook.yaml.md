@@ -6,6 +6,8 @@
         -   name:       Asegurar que git queda instalado en el entorno                      GUAY
         -   name:       Asegurar que NGINX queda instalado en el entorno                    GUAY
         -   name:       Asegurar que nginx tiene la configuración que necesito              CAMBIO
+
+
         -   name:       Asegurar que la carpeta para alojar la web está creada              GUAY
                             # Lenguaje imperativo... pero este lenguaje ... y este código lo aporta? EL MODULO !
                             #

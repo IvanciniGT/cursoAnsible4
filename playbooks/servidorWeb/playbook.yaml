@@ -7,8 +7,19 @@
             version:    1.15
         web:
             repo:       https://github.com/IvanciniGT/webEjemploAnsible
+            dominio:    mipaginita.com
             puerto:     8080
             carpeta:    /home/ubuntu/environment/datos/web
+            tests:
+                      - end_point:      /index.html
+                        status_code:    200
+                        respuesta:      Soy el fichero de la WEB
+                        
+                      - end_point:      /
+                        status_code:    200
+                        respuesta:      version
+                        
+        email:          ivan.osuna.ayuste@gmail.com
 
     pre_tasks:
     
@@ -43,13 +54,75 @@
             notify:     REINICIO_REQUERIDO
             tags:     
                       - configuracion
-    
+
+        -   name:       Asegurar que la carpeta para la web está creada
+                        # Si no esté git... pues ya sabes FELIPE !
+                        # [web.carpeta]
+            tags:
+                      - despliegue
+
+        -   name:       Asegurar que la última versión del repo está descargada en la carpeta
+                        # Si no esté git... pues ya sabes FELIPE !
+                        # [web.carpeta]
+                        # [web.repo]
+            notify:     REINICIO_REQUERIDO
+            tags:
+                      - despliegue
+
+        -   name:       Asegurar que el servidor web queda arrancado
+                        # Si no esté git... pues ya sabes FELIPE !
+            register:   arranque
+            tags:
+                      - despliegue
+
     post_tasks:
     
-    
+        -   name:           Validaciones finales
+            block:
+            
+              - name:       Asegurarme que el servidor web está arrancado
+                            # Miro el proceso a ver si está corriendo
+                tags:
+                          - pruebas
+                          - always
+                          
+              - name:       Asegurar que el servidor web ha abierto el puerto adecuado
+                            # puerto 
+                tags:
+                          - pruebas
+                          - always
+                          
+              - name:       Asegurar que el servidor web sirve la web en ese puerto
+                            # curl http://localhost:PUERTO/RUTA 
+                            #   CODIGO DE RESPUESTA HTTP 200
+                            #   SALIDA DONDE PUEDO YO IDENTIFICAR QUE LA WEB ESTA EN MARCHA
+                loop:       "{{ web.tests }}"
+                tags:
+                          - pruebas
+                          - always
+                          
+              - name:       Asegurar que la web está en funcionamiento desde fuera del host remoto
+                            # curl http://DIRECCION:PUERTO/RUTA -> 
+                            #   CODIGO DE RESPUESTA HTTP 200
+                            #   SALIDA DONDE PUEDO YO IDENTIFICAR QUE LA WEB ESTA EN MARCHA
+                loop:       "{{ web.tests }}"
+                tags:
+                          - pruebas
+                          - always
+                          
+            rescue:
+              - name:       Enviar email en caso de fallo
+                tags:
+                          - notificacion
+                          
+              - name:       Dar el playbook por fallido
+                tags:
+                          - always
+                          
     handlers:
     
         -   name:       Asegurar que nginx queda reiniciado
                         # Reinicia nginx... por el articulo 33
+            when:       arranque is not changed
             listen:
                       - REINICIO_REQUERIDO
