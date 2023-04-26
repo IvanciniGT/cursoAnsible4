@@ -1,0 +1,62 @@
+-   hosts:          localhost
+    gather_facts:   false
+    
+    vars:
+        lista_sencilla:
+            - item 1
+            - item 2
+            - item 3
+        
+        # Quiero.... tener una variable con una serie de programas
+        # que voy a instalar... y cada uno de esos programas puede
+        # o no tener un puerto, que habrá que abrir en un firewall
+        
+        programas_lista_de_mapas:   #########
+            -   nombre: nginx       #
+                puerto: 80          #   GENIAL !!!!
+            -   nombre: mariadb     #   MUY EXPLICITA !!!!
+                puertos: 3306       #       Y MANTENIBLE !
+            #-   nombre: nginx       #       MUY EXTENSIBLE
+            #    puerto: 81          # Esta tiene una ligera desventaja
+                                    # Es menos a prueba de DESPISTAOS !
+        
+        programa_y_su_puerto:       #######
+            nginx:                  #
+                puerto: 80          #   No está tan mal
+            mariadb:                #
+                puerto: 3306        #   Explicita
+            #nginx:                  #
+            #    puerto: 81          #
+        
+        mierda:                     #######
+            -   -   nginx           #
+                -   80              #   MIERDA ENORME !!!!!
+            -   -   mariadb         #   Qué es cada dato?
+                -   3306            #   Por qué? DE NUVO NO ES EXPLICITA !!!!
+        
+        solo_programas:     ####
+            - nginx         # 
+            - mariadb       #   MIERDA GIGANTE !!!!!
+                            #       La relación entre programa y puerto
+        solo_puertos:       #       NO ES EXPLICITA !
+            - 80            #   Dificulta el mantenimiento MUCHO !!!!
+            - 3306          #
+            
+        # La decisión es mia... pero una vez tomada... 
+        # voy a tener que vivir con esa decisión!!!
+        
+    tasks:
+        -   name:       Tarea que se ejecuta para todos los elementos de una lista
+            debug:
+                msg: |
+                        Soy el elemento: {{ item }}
+                
+            loop: "{{ lista_sencilla }}"
+            
+
+        -   name:       Tarea que muestra cada programa con su puerto
+            debug:
+                msg: |
+                        Soy el programa: ????? y tengo el puerto: ????
+                
+            loop: "{{ programas_lista_de_mapas }}"            
