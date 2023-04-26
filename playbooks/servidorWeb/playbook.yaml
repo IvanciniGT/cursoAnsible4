@@ -24,53 +24,71 @@
     pre_tasks:
     
         -   name:       Obtener el SO de la máquina sobre la que trabajo
-                        # Y ese dato... que lo sacaré con algún módulo (SETUP)
-            register:   sistema_operativo
+            setup:      # Esto me rellena el ansible_facts
+                gather_subset: 
+                      - distribution
             tags:
                       - always  # Este es un tag especial de ANSIBLE
+                      
             
         -   name:       Asegurar que estamos en un entorno ubuntu
-                        # Detengo el PLAY para el host                  (META)
+                        # Detengo el PLAY para el host                  
+            meta:       end_host
             when:       # si la máquina NO ES UBUNTU [sistema_operativo]
             tags:
                       - always  # Este es un tag especial de ANSIBLE
-        
-        -   name:       Asegurar que git queda instalado en el entorno  (APT)
-                        # Si no esté git... pues ya sabes FELIPE !
+                    
+        -   name:       Asegurar que tengo los repos de apt actualizados
+            apt:
+                update_cache: true
+            tags:
+                      - despliegue
+                      - instalacion
+
+        -   name:       Asegurar que git queda instalado en el entorno
+            apt:
+                name:   git>=1.7.1
+                state:  present
             tags:
                       - despliegue
 
     tasks:
     
-        -   name:       Asegurar que NGINX queda instalado en el entorno (APT)
-                        # Si no lo está... pues ya sabes FELIPE !
-                        # [nginx.version]
+        -   name:       Asegurar que NGINX queda instalado en el entorno
+            apt:
+                name:   "nginx={{nginx.version}}"
+                state:  present
             tags:     
                       - instalacion
                       
-        -   name:       Asegurar que NGINX queda configurado como necesito para mi web (TEMPLATE)
-                        # Si no lo está... pues ya sabes FELIPE !
-                        # [nginx.puerto , nginx.carpeta]
+        -   name:       Asegurar que NGINX queda configurado como necesito para mi web
+            template:
+                src:    configuracion.nginx.cong
+                dest:   /etc/nginx/sites-available/default
+                mode:   '0644'
             notify:     REINICIO_REQUERIDO
             tags:     
                       - configuracion
 
-        -   name:       Asegurar que la carpeta para la web está creada         (FILE)
-                        # Si no esté git... pues ya sabes FELIPE !
-                        # [web.carpeta]
+        -   name:       Asegurar que la carpeta para la web está creada 
+            file:
+                path:   "{{ web.carpeta }}"
+                state:  directory
             tags:
                       - despliegue
 
-        -   name:       Asegurar que la última versión del repo está descargada en la carpeta (GIT)
-                        # Si no esté git... pues ya sabes FELIPE !
-                        # [web.carpeta]
-                        # [web.repo]
+        -   name:       Asegurar que la última versión del repo está descargada en la carpeta
+            git:
+                repo:   '{{ web.repo }}'
+                dest:   "{{ web.carpeta }}"
             notify:     REINICIO_REQUERIDO
             tags:
                       - despliegue
 
-        -   name:       Asegurar que el servidor web queda arrancado (SERVICE)
-                        # Si no esté git... pues ya sabes FELIPE !
+        -   name:       Asegurar que el servidor web queda arrancado
+            service:
+                name:   nginx
+                state:  started
             register:   arranque
             tags:
                       - despliegue
@@ -121,8 +139,10 @@
                           
     handlers:
     
-        -   name:       Asegurar que nginx queda reiniciado (SERVICE)
-                        # Reinicia nginx... por el articulo 33
+        -   name:       Asegurar que nginx queda reiniciado
+            service:
+                name:   nginx
+                state:  restarted
             when:       arranque is not changed
             listen:
                       - REINICIO_REQUERIDO
