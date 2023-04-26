@@ -15,7 +15,7 @@
             -   nombre: nginx       #
                 puerto: 80          #   GENIAL !!!!
             -   nombre: mariadb     #   MUY EXPLICITA !!!!
-                puertos: 3306       #       Y MANTENIBLE !
+                puerto: 3306       #       Y MANTENIBLE !
             #-   nombre: nginx       #       MUY EXTENSIBLE
             #    puerto: 81          # Esta tiene una ligera desventaja
                                     # Es menos a prueba de DESPISTAOS !
@@ -54,7 +54,7 @@
             loop: "{{ lista_sencilla }}"
             
 
-        -   name:       Tarea que muestra cada programa con su puerto
+        -   name:       Tarea que muestra cada programa con su puerto (desde una lista)
             debug:
                 msg: |
                         Soy el programa: {{ item.nombre }} y tengo el puerto: {{ item.puerto }}
@@ -65,3 +65,144 @@
             #    item:
             #        nombre: nginx
             #        puerto: 80
+
+        -   name:       Tarea que muestra cada programa con su puerto (desde un diccionario)
+            debug:
+                msg: |
+                        Soy el programa: {{ item.key }} y tengo el puerto: {{ item.value.puerto }}
+                
+            #loop: "{{ programa_y_su_puerto }}"            
+            # Tengo una variable llamada:  OSTION EN TO LOS MORROS !!!!!
+            # UPS !!!
+            # En Ansible no podemos usar un diccionario dentro de un loop... NO SE PUEDE !
+            # SOLUCION ? 
+            # Convertir el diccionario a una lista !
+            loop: "{{ programa_y_su_puerto | dict2items }}"            
+            # Y eso lo hacemos con un pipe de JINJA, llamado dict2items
+            #    DICCIONARIO                             LISTA
+            #    programa_y_su_puerto:                    
+            #        nginx:                              - key: nginx
+            #            puerto: 80                        value: 
+            #                                                puerto: 80
+            #        mariadb:                            - key: mariadb
+            #            puerto: 3306                      value:
+            #                                                puerto: 3306
+            # Tengo una variable llamada: item
+            # Cuya esctura será?
+            #   key: nginx
+            #   value: 
+            #       puerto: 80
+            
+        -   name:       Listar programas con SUS PUERTOS
+            debug:
+                msg: |
+                        Soy el programa: {{ item[0].nombre }} y tengo el puerto: {{ item[1] }}
+            loop: "{{ programas | subelements('puertos') }}"
+            vars:
+                programas:
+                    -   nombre: nginx
+                        puertos: 
+                            - 80
+                            - 443
+                    -   nombre: mariadb
+                        puertos: 
+                            - 3306   
+
+            # En python...
+            # bucle dentro de otro bucle
+            # Por cada programa en la lista de programas:
+            #   Por cada puerto en la lista de puertos de ese programa:
+            #       Imprimo!
+            # En Ansible no puedo anidar LOOPs. NO ESTA DISPONIBLE ESA FUNCION !
+            
+            # SOLUCION? 
+            # De alguna forma GENERAR UNA LISTA DONDE TENGA TODOS LO QUE NECESITO... 
+            # en mi caso los 3 elementos.. y ya la proceso
+            # En este caso, para bucles anidados, usamos: el pipe subelements
+            # ITEM????
+            #        -   nombre: mariadb
+            #            puertos: 
+            #                - 3306
+            #        -   3306
+            # Que hace subelements
+            #
+            #    -   -   nombre: nginx
+            #            puertos: 
+            #                - 80
+            #                - 443
+            #        -   80
+            #    -   -   nombre: nginx
+            #            puertos: 
+            #                - 80
+            #                - 443
+            #        -   443
+            #    -   -   nombre: mariadb
+            #            puertos: 
+            #                - 3306
+            #        -   3306
+            
+
+            
+        -   name:       Listar programas con SUS PUERTOS (desde mapa)
+            debug:
+                msg: |
+                        Soy el programa: {{ item[0].key }} y tengo el puerto: {{ item[1] }}
+            loop: "{{ programas | dict2items | subelements('value.puertos') }}"
+            vars:
+                programas:
+                    nginx:
+                        puertos: 
+                            - 80
+                            - 443
+                    mariadb:
+                        puertos: 
+                            - 3306   
+                            
+                            
+            #        -   key: nginx
+            #            value:
+            #                puertos: 
+            #                    - 80
+            #                    - 443                   
+            #            vvvv
+            #        -   -   key: nginx
+            #                value:
+            #                    puertos: 
+            #                        - 80
+            #                        - 443
+            #            -   80
+            #        -   -   key: nginx
+            #                value:
+            #                    puertos: 
+            #                        - 80
+            #                        - 443
+            #            -   443
+            #            
+    # En resumen... que decisión me interesa tomar? Cómo estructuraré la variable? 
+    # Qué criterio aplico para decidir la forma en la que me interesa estructurar la variable?
+    # ME FIJO EN SI ME VA A SER MAS SENCILLO DE PROCESAR? NO
+    # Para eso hemos aprendido a procesar variables de distinta naturaleza
+    # LEGIBILIDAD y MANTENIBILIDAD <<< POR ENCIMA DE TODO !
+
+# Me temo que esto no es todo....
+# En ocasiones yo decido la estructura de las variables que voy a manejar...
+# En ocasiones ANSIBLE YA LO HA DECIDIDO POR MI !
+
+        -   name: Ejecutar comandos
+            shell:
+                cmd:    "{{ item}}"
+            loop:   "{{ comandos }}"
+            register: salida
+            ignore_errors: true
+            var:
+                comandos:
+                    - echo Hola
+                    - echo Adios
+                    - clear
+                    - explosion de narices
+        
+        -   name: Comandos que han fallado
+            debug:
+                msg: |
+                        El comando: {{  }} ha fallado.... :(
+        
