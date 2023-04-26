@@ -1,0 +1,15 @@
+
+-   name:       Asegurar que tengo los repos de apt actualizados
+    apt:
+        update_cache:   true
+    changed_when:       false
+    tags:
+              - despliegue
+              - instalacion
+
+-   name:       Asegurar que git queda instalado en el entorno
+    apt:
+        name:   git
+        state:  present
+    tags:
+              - despliegue

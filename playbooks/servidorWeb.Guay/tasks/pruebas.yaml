@@ -1,0 +1,62 @@
+-   name:           Validaciones finales
+    block:
+    
+      - name:       Asegurarme que el servidor web está arrancado
+        shell:
+            cmd:    "[ $(ps -eaf | grep -c nginx) -gt 1 ]" # Devuel un codigo de respuesta 0 o 1 en función de si nginx corre o no
+        changed_when:   false
+        tags:
+                  - pruebas
+
+      - name:       Asegurar que el servidor web ha abierto el puerto adecuado
+        wait_for:
+            port:   "{{ web.puerto }}"
+            timeout: 60
+        tags:
+                  - pruebas
+
+      - name:       Asegurar que el servidor web sirve la web en ese puerto
+        uri:
+            url:    "http://localhost:{{ web.puerto }}/{{ item.end_point }}"
+            method: GET
+            status_code: "{{ item.status_code }}"
+            return_content: true
+        # TODO register:   peticion_local
+        
+        loop:       "{{ web.tests }}" # A cada elemento le da el nombre de variable "item"
+        tags:
+                  - pruebas
+
+      - name:       Asegurar que la web está en funcionamiento desde fuera del host remoto
+        uri:
+            url:    "http://{{ web.dominio }}:{{ web.puerto }}/{{ item.end_point }}"
+            method: GET
+            status_code: "{{ item.status_code }}"
+            return_content: true
+        delegate_to:    localhost       # Esta tarea no quiero que se haga en el remoto... sino en el controlador
+        loop:       "{{ web.tests }}"
+        tags:
+                  - pruebas
+                  - monitorizacion
+                  - always
+
+    rescue:
+      - name:       Enviar email en caso de fallo
+        mail:
+            host:       localhost
+            port:       1025
+            #username:  username@gmail.com
+            #password:  mysecret
+            from:       sistema.notificacion@marrones.com
+            to:         "Administardor JEFE de resolución de problemas <{{ email }}>"
+            subject:    Follón gordo !!!!! Esto ha petao !!!
+            body:       "La instalación en {{ ansible_hostname }} ha fallao pero bien !!!!"
+        ignore_errors:  true
+        tags:
+                  - notificacion
+        
+      - name:       Dar el playbook por fallido
+        fail:
+            msg:    "La instalación en {{ ansible_hostname }} ha fallao pero bien !!!!"
+        tags:
+                  - always

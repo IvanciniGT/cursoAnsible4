@@ -1,0 +1,15 @@
+-   name:       Obtener el SO de la máquina sobre la que trabajo
+    setup:      # Esto me rellena el ansible_facts
+        gather_subset: 
+              - distribution
+    tags:
+              - always  # Este es un tag especial de ANSIBLE
+              
+    
+-   name:       Asegurar que estamos en un entorno ubuntu
+                # Detengo el PLAY para el host                  
+    meta:       end_host
+    when:       ansible_facts.distribution != "Ubuntu" # si la máquina NO ES UBUNTU [sistema_operativo]
+    tags:
+              - always  # Este es un tag especial de ANSIBLE
+            

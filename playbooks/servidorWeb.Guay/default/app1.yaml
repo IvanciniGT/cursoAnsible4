@@ -1,0 +1,14 @@
+web:
+    repo:       https://github.com/IvanciniGT/webEjemploAnsible
+    dominio:    mipaginita.com
+    puerto:     8080
+    carpeta:    /home/ubuntu/environment/datos/web
+    tests:
+              - end_point:      /index.html
+                status_code:    200
+                respuesta:      Soy el fichero de la WEB
+                
+              - end_point:      /
+                status_code:    200
+                respuesta:      version
+                

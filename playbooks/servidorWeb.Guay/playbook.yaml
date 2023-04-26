@@ -1,0 +1,29 @@
+-   name:               Quiero NGINX Arriba donde? Ubuntu! !!!!!
+    hosts:              localhost
+    gather_facts:       false
+    become:             true # Haz las operaciones con sudo. Esto trabaja en conjunto con otra propiedad que es become_method=sudo | su root
+
+    pre_tasks:
+        -   name:           Asegurar el entorno de ejecución
+            include_tasks:  tasks/asegurar_entorno.yaml
+        -   name:           Preparación del entorno
+            include_tasks:  tasks/preparar_entorno.yaml
+        -   name:           Carga de las variables  #(LAS MIAS, las gordas!)
+            include_vars:   vars/vars.yaml
+    tasks:
+        -   name:           Dejar el nginx y la app como se debe
+            include_tasks:  tasks/nginx_y_app.yaml
+    
+    post_tasks:
+        -   name:           Verificar la ejecución del playbook
+            include_tasks:  tasks/pruebas.yaml
+                          
+    handlers:
+    
+        -   name:       Asegurar que nginx queda reiniciado
+            service:
+                name:   nginx
+                state:  restarted
+            when:       arranque is not changed
+            listen:
+                      - REINICIO_REQUERIDO

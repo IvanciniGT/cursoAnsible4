@@ -1,4 +1,4 @@
--   name:               Quiero NGINX Arriba !!!!!
+-   name:               Quiero NGINX Arriba donde? Ubuntu! !!!!!
     hosts:              localhost
     gather_facts:       false
     become:             true # Haz las operaciones con sudo. Esto trabaja en conjunto con otra propiedad que es become_method=sudo | su root
