@@ -4,7 +4,7 @@
     become:             true # Haz las operaciones con sudo. Esto trabaja en conjunto con otra propiedad que es become_method=sudo | su root
     vars:
         nginx:
-            version:    1.15
+            version:    1.14*
         web:
             repo:       https://github.com/IvanciniGT/webEjemploAnsible
             dominio:    mipaginita.com
@@ -34,20 +34,21 @@
         -   name:       Asegurar que estamos en un entorno ubuntu
                         # Detengo el PLAY para el host                  
             meta:       end_host
-            when:       # si la máquina NO ES UBUNTU [sistema_operativo]
+            when:       ansible_facts.distribution != "Ubuntu" # si la máquina NO ES UBUNTU [sistema_operativo]
             tags:
                       - always  # Este es un tag especial de ANSIBLE
                     
         -   name:       Asegurar que tengo los repos de apt actualizados
             apt:
                 update_cache: true
+            changed_when:       false
             tags:
                       - despliegue
                       - instalacion
 
         -   name:       Asegurar que git queda instalado en el entorno
             apt:
-                name:   git>=1.7.1
+                name:   git
                 state:  present
             tags:
                       - despliegue
@@ -63,7 +64,7 @@
                       
         -   name:       Asegurar que NGINX queda configurado como necesito para mi web
             template:
-                src:    configuracion.nginx.cong
+                src:    ./configuracion.nginx.conf
                 dest:   /etc/nginx/sites-available/default
                 mode:   '0644'
             notify:     REINICIO_REQUERIDO

@@ -39,3 +39,9 @@
 - Pruebas de integración        SE CENTRAN en la COMUNICACION entre componentes
 - Pruebas de sistema            SE CENTRA en el COMPORTAMIENTO del sistema en su conjunto
     - Pruebas de aceptación
+
+
+sudo apt update -y
+sudo apt install software-properties-common -y
+sudo add-apt-repository --yes --update ppa:ansible/ansible
+sudo apt install ansible -y

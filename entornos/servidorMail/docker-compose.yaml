@@ -8,4 +8,4 @@ services:
                                       - 1025:1025   # smtp
                                       - 8081:8025
 
-# docker compose up
+# docker compose up -d
