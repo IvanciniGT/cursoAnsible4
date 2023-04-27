@@ -263,3 +263,11 @@
         # list, convierte algo a una lista... En nuestro caso, forzamos la ejecución del selectattr
         # map... genera una lista conteniendo el resultado de aplicar una función sobre cada elemento de una lista de entrada
         # [1,2,3] -> Map (cada elemento x 2) -> [2,4,6]
+
+        -   name:
+            debug:
+                msg: |
+                        El texto: {{ contenido }} contiene la palabra "texto" ? 
+                        {{ "fichero" in contenido }}
+            vars:
+                contenido: Soy el fichero de la WEB, version 4!!!!!!     

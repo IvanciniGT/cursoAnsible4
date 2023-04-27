@@ -1,0 +1,6 @@
+ansible_host: localhost
+ansible_connection: local
+cmdb_id: 1289358
+puertos:
+    - 80
+    - 8081

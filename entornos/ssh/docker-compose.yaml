@@ -1,0 +1,17 @@
+version: "2"
+
+services:
+    entorno1:                    
+        image:                          rastasheep/ubuntu-sshd
+        container_name:                 entorno1
+    entorno2:                    
+        image:                          rastasheep/ubuntu-sshd
+        container_name:                 entorno2
+    entorno3:                    
+        image:                          rastasheep/ubuntu-sshd
+        container_name:                 entorno3
+    entorno4:                    
+        image:                          rastasheep/ubuntu-sshd
+        container_name:                 entorno4
+
+# docker compose up -d

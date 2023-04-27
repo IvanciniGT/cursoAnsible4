@@ -1,0 +1,16 @@
+
+-   name:       Asegurar que NGINX queda instalado en el entorno
+    apt:
+        name:   "nginx={{nginx.version}}"
+        state:  present
+    tags:     
+              - instalacion
+              
+-   name:       Asegurar que NGINX queda configurado como necesito para mi web
+    template:
+        src:    templates/configuracion.nginx.conf
+        dest:   /etc/nginx/sites-available/default
+        mode:   '0644'
+    notify:     REINICIO_REQUERIDO
+    tags:     
+              - configuracion

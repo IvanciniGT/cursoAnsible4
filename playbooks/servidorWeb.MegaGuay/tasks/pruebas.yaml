@@ -21,11 +21,30 @@
             method: GET
             status_code: "{{ item.status_code }}"
             return_content: true
-        # TODO register:   peticion_local
-        
+        # Si pregunto por la variable "peticion_local" en la tarea 
+        # donde se origina, me devuelve un mapa, con el resultado 
+        # de LA EJECUCION concreta que esté procesando en el momento 
+        # que evaluo la variable
+        failed_when: item.respuesta not in peticion_local.content
+        register:   peticion_local
         loop:       "{{ web.tests }}" # A cada elemento le da el nombre de variable "item"
         tags:
                   - pruebas
+        
+        # Si pregunto por la variable "peticion_local" fuera de la tarea 
+        # donde se origina, me devuelve un mapa, que contiene una lista con
+        # el resultado de CADA EJECUCION, todos juntos, en una lista
+      #- name:       Mirar el resultado de la tarea anterior
+      #  debug:
+      #      var:    peticion_local
+
+      #- name:       Asegurar que la web responde lo que debe
+      #  fail:
+      #      msg: |
+      #              El endpoint: {{ item.item.end_point }} no ha contestado 
+      #              un texto con el valor: {{ item.item.respuesta }} 
+      #  when:       item.item.respuesta not in item.content
+      #  loop:       "{{ peticion_local.results }}"
 
       - name:       Asegurar que la web está en funcionamiento desde fuera del host remoto
         uri:

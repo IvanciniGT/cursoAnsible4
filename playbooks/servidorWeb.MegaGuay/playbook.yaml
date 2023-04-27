@@ -2,12 +2,16 @@
     hosts:              localhost
     gather_facts:       false
     become:             true # Haz las operaciones con sudo. Esto trabaja en conjunto con otra propiedad que es become_method=sudo | su root
-
+    vars:
+        distribuciones_validas:
+            - Ubuntu
+            - Fedora
     pre_tasks:
         -   name:           Asegurar el entorno de ejecución
             include_tasks:  tasks/asegurar_entorno.yaml
         -   name:           Preparación del entorno
-            include_tasks:  tasks/preparar_entorno.yaml
+            include_tasks:  |
+                                tasks/distribuciones/{{ansible_distribution}}/preparar_entorno.yaml
         -   name:           Carga de las variables  #(LAS MIAS, las gordas!)
             include_vars:   vars/vars.yaml
     tasks:

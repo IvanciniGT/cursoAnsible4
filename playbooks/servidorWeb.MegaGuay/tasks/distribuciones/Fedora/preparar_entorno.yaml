@@ -1,0 +1,8 @@
+# TODO: Esto habría que cambiarlo a fedora
+-   name:       Asegurar que git queda instalado en el entorno
+    yum:
+        name:   git
+        state:  present
+    tags:
+              - despliegue
+    
