@@ -15,11 +15,70 @@
 -   name:               Asegurar conectividad
     hosts:              all
     gather_facts:       false
+    vars:
+        generate_finger_print_on_unknown:   True
+        regenerate_finger_print_on_changed: False
+        default_finger_print_algorythm:     ecdsa
     
     tasks:
-        -   name:       Tarea a ejecutar en el remoto
+        -   name:           Saber si ya tengo mi máquina registrada
             shell:
-                cmd:    echo Eureka
+                cmd: |      
+                            {{ ansible_host }}
+            delegate:       localhost
+            changed_when:   false
+            register:       antiguo
+            
+        -   name:           Detener el play si no conozco la máquina y no me piden que le genere finger_print
+            fail:
+                msg:
+            when:           {{ generate_finger_print_on_unknown }} {{ antiguo }}
+            
+
+        -   name:           Obtener la nueva huella para la máquina
+            shell:
+                cmd: |      
+                            ssh-keyscan -H {{ ansible_host }} {{ finger_print_algorythm | antiguo }}
+            delegate:       localhost
+            changed_when:   false
+            register:       nuevo
+            # De cara a comparar.... para evr si ha cambiado o no ... que algoritmo necesito? 
+            
+        -   name:           Detener el play si no hay conexión con la máquina
+            fail:
+                msg:
+        
+        ## AQUI TOCAMOS EL FICHERO KNOWN_HOSTS
+        -   name:           Operaciones sobre el fichero Known_hosts
+            block:
+                -   name:           Asegurarme un backup del known_hosts si lo voy a tocar
+                    delegate:       localhost
+
+                -   name:           Asegurarme que no queda finger_print de la máquina anterior 
+                    shell:
+                        cmd: |
+                    delegate:       localhost
+                    when:           {{ antiguo }} y {{ nuevo }} {{ regenerate_finger_print_on_changed }}
+                    
+                -   name:           Asegurar que la máquina queda registrada
+                    shell:
+                        cmd: |
+                    delegate:       localhost
+                    when:           {{ generate_finger_print_on_unknown }} {{ antiguo }}
+                    notify:         NUEVA_ENTRADA
+            rescue:
+                -   name:           Y si me ha dado error algo? Pa eso he hecho una copia de seguridad
+                    delegate:       localhost
+                    
+            when:            Cuando lo vaya a tocar
+
+    handlers:            
+        -   name:           Notificar nueva entrada en known_host 
+            listen:
+                          - NUEVA_ENTRADA
+            
+            
+            
 
 # $ ansible-playbook -i entornos.ini playbook.yaml
 #                    -e VAR=val
@@ -27,3 +86,21 @@
 #                    --tags TAGS
 #                    --skip-tags TAGS
 #                    -i INVENTORY_PATH
+
+
+ALGORITMO QUE ME PIDEN : ssh-rsa
+
+# 172.19.0.3:22 SSH-2.0-OpenSSH_7.6p1 Ubuntu-4
+|1|s3ha6Os0o+HTtMyTDxPV8Suo2co=|TsLmdRD50J8oIUzt9R3KgkAvI0A= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBM8OPjNQMlQ1tIwWHnCYdAYr44KBXU/viuigD5646W4J5rvUC9Kuv0eX2aaVOyPFxhqzZeJftcriA6iQrL/0p9c=
+
+# 172.19.0.3:22 SSH-2.0-OpenSSH_7.6p1 Ubuntu-4
+|1|iRXT4UMyhh31xFLOpDesN3yyiy4=|YBdYgHK/a+kdUler3qWKj7qBops= ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC9NiRfkrMv08eGphrb0Nu1dXrf+8FRTPCjI+FXO5SJM1xj2bDknSMy4ncavZ/0qMWNB5YkGxPIn1DkOm9gYuOy8PGlcL1rLrG+jE1YjGqDy3HrIP3CKkyA5YrZDQut1EvETmlVOK/VW9d6lAC+6qtjk+Npm4IsmaUAlJoG2E9dU2FpCio2eAknGe4ZvCQZrTk49qyrpj5XAOa/TWBgJE/9kktl7amQoqRSoB4RGnnpoKGlpJswqIFmsZhHRgX+nPqIxcGbJ22z8EDjDUDt9z8lY4/UTIPWkjSkyRpwgMJar7baFzuV4IA3yH8Q+sLuEbMP5NWHdIAk8RyMwG7ifUsT
+                                                                     ----------------->
+
+# 172.19.0.3:22 SSH-2.0-OpenSSH_7.6p1 Ubuntu-4
+|1|DDrBB86ENeJUHyG02V+IKOjLWqo=|PH+jseYWHY+XqLBCtCJIQZ6OGTg= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFjDZ9C89nUVGQ1qZzG/X0onkmcju4kWJ2uTLBdIXsy1
+
+
+---
+
+|1|QWr4a8qr+wEtiNfX2J0TPwJ26Rg=|H7exG85gths6Fjba8w3EaaTOAVI= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBM8OPjNQMlQ1tIwWHnCYdAYr44KBXU/viuigD5646W4J5rvUC9Kuv0eX2aaVOyPFxhqzZeJftcriA6iQrL/0p9c=
