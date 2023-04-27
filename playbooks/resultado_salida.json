@@ -1,0 +1,442 @@
+[
+    {
+        "ansible_loop_var": "item", 
+        "changed": false, 
+        "cmd": "netstat -lnt  | grep -c \":80 \"    \n", 
+        "delta": "0:00:00.471212", 
+        "end": "2023-04-27 08:05:32.062351", 
+        "failed": false, 
+        "failed_when_result": false, 
+        "invocation": {
+            "module_args": {
+                "_raw_params": "netstat -lnt  | grep -c \":80 \"    \n", 
+                "_uses_shell": true, 
+                "argv": null, 
+                "chdir": null, 
+                "creates": null, 
+                "executable": null, 
+                "removes": null, 
+                "stdin": null, 
+                "stdin_add_newline": true, 
+                "strip_empty_ends": true, 
+                "warn": true
+            }
+        }, 
+        "item": [
+            {
+                "key": "nginx", 
+                "value": {
+                    "puertos": [
+                        80, 
+                        443
+                    ]
+                }
+            }, 
+            80
+        ], 
+        "rc": 0, 
+        "start": "2023-04-27 08:05:31.591139", 
+        "stderr": "", 
+        "stderr_lines": [], 
+        "stdout": "1", 
+        "stdout_lines": [
+            "1"
+        ]
+    }, 
+    {
+        "ansible_loop_var": "item", 
+        "changed": false, 
+        "cmd": "netstat -lnt  | grep -c \":443 \"    \n", 
+        "delta": "0:00:00.471320", 
+        "end": "2023-04-27 08:05:32.674966", 
+        "failed": false, 
+        "failed_when_result": false, 
+        "invocation": {
+            "module_args": {
+                "_raw_params": "netstat -lnt  | grep -c \":443 \"    \n", 
+                "_uses_shell": true, 
+                "argv": null, 
+                "chdir": null, 
+                "creates": null, 
+                "executable": null, 
+                "removes": null, 
+                "stdin": null, 
+                "stdin_add_newline": true, 
+                "strip_empty_ends": true, 
+                "warn": true
+            }
+        }, 
+        "item": [
+            {
+                "key": "nginx", 
+                "value": {
+                    "puertos": [
+                        80, 
+                        443
+                    ]
+                }
+            }, 
+            443
+        ], 
+        "msg": "non-zero return code", 
+        "rc": 1, 
+        "start": "2023-04-27 08:05:32.203646", 
+        "stderr": "", 
+        "stderr_lines": [], 
+        "stdout": "0", 
+        "stdout_lines": [
+            "0"
+        ]
+    }, 
+    {
+        "ansible_loop_var": "item", 
+        "changed": false, 
+        "cmd": "netstat -lnt  | grep -c \":3306 \"    \n", 
+        "delta": "0:00:00.472640", 
+        "end": "2023-04-27 08:05:33.284090", 
+        "failed": false, 
+        "failed_when_result": false, 
+        "invocation": {
+            "module_args": {
+                "_raw_params": "netstat -lnt  | grep -c \":3306 \"    \n", 
+                "_uses_shell": true, 
+                "argv": null, 
+                "chdir": null, 
+                "creates": null, 
+                "executable": null, 
+                "removes": null, 
+                "stdin": null, 
+                "stdin_add_newline": true, 
+                "strip_empty_ends": true, 
+                "warn": true
+            }
+        }, 
+        "item": [
+            {
+                "key": "mariadb", 
+                "value": {
+                    "puertos": [
+                        3306
+                    ]
+                }
+            }, 
+            3306
+        ], 
+        "rc": 0, 
+        "start": "2023-04-27 08:05:32.811450", 
+        "stderr": "", 
+        "stderr_lines": [], 
+        "stdout": "1", 
+        "stdout_lines": [
+            "1"
+        ]
+    }, 
+    {
+        "ansible_loop_var": "item", 
+        "changed": false, 
+        "cmd": "netstat -lnt  | grep -c \":8081 \"    \n", 
+        "delta": "0:00:00.470339", 
+        "end": "2023-04-27 08:05:33.893446", 
+        "failed": false, 
+        "failed_when_result": false, 
+        "invocation": {
+            "module_args": {
+                "_raw_params": "netstat -lnt  | grep -c \":8081 \"    \n", 
+                "_uses_shell": true, 
+                "argv": null, 
+                "chdir": null, 
+                "creates": null, 
+                "executable": null, 
+                "removes": null, 
+                "stdin": null, 
+                "stdin_add_newline": true, 
+                "strip_empty_ends": true, 
+                "warn": true
+            }
+        }, 
+        "item": [
+            {
+                "key": "jenkins", 
+                "value": {
+                    "puertos": [
+                        8081, 
+                        30000
+                    ]
+                }
+            }, 
+            8081
+        ], 
+        "msg": "non-zero return code", 
+        "rc": 1, 
+        "start": "2023-04-27 08:05:33.423107", 
+        "stderr": "", 
+        "stderr_lines": [], 
+        "stdout": "0", 
+        "stdout_lines": [
+            "0"
+        ]
+    }, 
+    {
+        "ansible_loop_var": "item", 
+        "changed": false, 
+        "cmd": "netstat -lnt  | grep -c \":30000 \"    \n", 
+        "delta": "0:00:00.472982", 
+        "end": "2023-04-27 08:05:34.503352", 
+        "failed": false, 
+        "failed_when_result": false, 
+        "invocation": {
+            "module_args": {
+                "_raw_params": "netstat -lnt  | grep -c \":30000 \"    \n", 
+                "_uses_shell": true, 
+                "argv": null, 
+                "chdir": null, 
+                "creates": null, 
+                "executable": null, 
+                "removes": null, 
+                "stdin": null, 
+                "stdin_add_newline": true, 
+                "strip_empty_ends": true, 
+                "warn": true
+            }
+        }, 
+        "item": [
+            {
+                "key": "jenkins", 
+                "value": {
+                    "puertos": [
+                        8081, 
+                        30000
+                    ]
+                }
+            }, 
+            30000
+        ], 
+        "msg": "non-zero return code", 
+        "rc": 1, 
+        "start": "2023-04-27 08:05:34.030370", 
+        "stderr": "", 
+        "stderr_lines": [], 
+        "stdout": "0", 
+        "stdout_lines": [
+            "0"
+        ]
+    }
+]
+
+[
+    {
+        "ansible_loop_var": "item", 
+        "changed": false, 
+        "cmd": "netstat -lnt  | grep -c \":443 \"    \n", 
+        "delta": "0:00:00.469763", 
+        "end": "2023-04-27 08:13:23.458600", 
+        "failed": false, 
+        "failed_when_result": false, 
+        "invocation": {
+            "module_args": {
+                "_raw_params": "netstat -lnt  | grep -c \":443 \"    \n", 
+                "_uses_shell": true, 
+                "argv": null, 
+                "chdir": null, 
+                "creates": null, 
+                "executable": null, 
+                "removes": null, 
+                "stdin": null, 
+                "stdin_add_newline": true, 
+                "strip_empty_ends": true, 
+                "warn": true
+            }
+        }, 
+        "item": [
+            {
+                "key": "nginx", 
+                "value": {
+                    "puertos": [
+                        80, 
+                        443
+                    ]
+                }
+            }, 
+            443
+        ], 
+        "msg": "non-zero return code", 
+        "rc": 1, 
+        "start": "2023-04-27 08:13:22.988837", 
+        "stderr": "", 
+        "stderr_lines": [], 
+        "stdout": "0", 
+        "stdout_lines": [
+            "0"
+        ]
+    }, 
+    {
+        "ansible_loop_var": "item", 
+        "changed": false, 
+        "cmd": "netstat -lnt  | grep -c \":8081 \"    \n", 
+        "delta": "0:00:00.465153", 
+        "end": "2023-04-27 08:13:24.669861", 
+        "failed": false, 
+        "failed_when_result": false, 
+        "invocation": {
+            "module_args": {
+                "_raw_params": "netstat -lnt  | grep -c \":8081 \"    \n", 
+                "_uses_shell": true, 
+                "argv": null, 
+                "chdir": null, 
+                "creates": null, 
+                "executable": null, 
+                "removes": null, 
+                "stdin": null, 
+                "stdin_add_newline": true, 
+                "strip_empty_ends": true, 
+                "warn": true
+            }
+        }, 
+        "item": [
+            {
+                "key": "jenkins", 
+                "value": {
+                    "puertos": [
+                        8081, 
+                        30000
+                    ]
+                }
+            }, 
+            8081
+        ], 
+        "msg": "non-zero return code", 
+        "rc": 1, 
+        "start": "2023-04-27 08:13:24.204708", 
+        "stderr": "", 
+        "stderr_lines": [], 
+        "stdout": "0", 
+        "stdout_lines": [
+            "0"
+        ]
+    }, 
+    {
+        "ansible_loop_var": "item", 
+        "changed": false, 
+        "cmd": "netstat -lnt  | grep -c \":30000 \"    \n", 
+        "delta": "0:00:00.460986", 
+        "end": "2023-04-27 08:13:25.269915", 
+        "failed": false, 
+        "failed_when_result": false, 
+        "invocation": {
+            "module_args": {
+                "_raw_params": "netstat -lnt  | grep -c \":30000 \"    \n", 
+                "_uses_shell": true, 
+                "argv": null, 
+                "chdir": null, 
+                "creates": null, 
+                "executable": null, 
+                "removes": null, 
+                "stdin": null, 
+                "stdin_add_newline": true, 
+                "strip_empty_ends": true, 
+                "warn": true
+            }
+        }, 
+        "item": [
+            {
+                "key": "jenkins", 
+                "value": {
+                    "puertos": [
+                        8081, 
+                        30000
+                    ]
+                }
+            }, 
+            30000
+        ], 
+        "msg": "non-zero return code", 
+        "rc": 1, 
+        "start": "2023-04-27 08:13:24.808929", 
+        "stderr": "", 
+        "stderr_lines": [], 
+        "stdout": "0", 
+        "stdout_lines": [
+            "0"
+        ]
+    }
+]
+
+[
+    [
+        {
+            "key": "nginx", 
+            "value": {
+                "puertos": [
+                    80, 
+                    443
+                ]
+            }
+        }, 
+        443
+    ], 
+    [
+        {
+            "key": "jenkins", 
+            "value": {
+                "puertos": [
+                    8081, 
+                    30000
+                ]
+            }
+        }, 
+        8081
+    ], 
+    [
+        {
+            "key": "jenkins", 
+            "value": {
+                "puertos": [
+                    8081, 
+                    30000
+                ]
+            }
+        }, 
+        30000
+    ]
+]
+
+[
+    {
+        "key": "nginx", 
+        "value": {
+            "puertos": [
+                80, 
+                443
+            ]
+        }
+    }, 
+    {
+        "key": "jenkins", 
+        "value": {
+            "puertos": [
+                8081, 
+                30000
+            ]
+        }
+    }, 
+    {
+        "key": "jenkins", 
+        "value": {
+            "puertos": [
+                8081, 
+                30000
+            ]
+        }
+    }
+]
+
+[
+    "nginx", 
+    "jenkins", 
+    "jenkins"
+]
+
+[
+    "nginx", 
+    "jenkins"
+]

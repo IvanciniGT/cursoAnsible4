@@ -190,19 +190,76 @@
 
         -   name: Ejecutar comandos
             shell:
-                cmd:    "{{ item}}"
+                cmd:    "{{ item }}"
             loop:   "{{ comandos }}"
             register: salida
             ignore_errors: true
-            var:
+            vars:
                 comandos:
                     - echo Hola
                     - echo Adios
                     - clear
                     - explosion de narices
         
+        -   name: Salida del comando anterior
+            debug:
+                var: salida
+        
         -   name: Comandos que han fallado
             debug:
                 msg: |
-                        El comando: {{  }} ha fallado.... :(
-        
+                        El comando: {{ item.item }} ha fallado.... :(
+            when: item.failed
+            loop: "{{ salida.results }}"
+
+
+
+
+
+
+
+
+
+
+        -   name:       Listar programas con SUS PUERTOS
+            shell:
+                cmd: >
+                    netstat -lnt 
+                    | grep -c ":{{item[1]}} "    
+            loop: "{{ programas | dict2items | subelements('value.puertos') }}"
+            register: estado_puertos
+            failed_when: false
+            changed_when: false
+            vars:
+                programas:
+                    nginx:
+                        puertos: 
+                            - 80
+                            - 443
+                    mariadb:
+                        puertos: 
+                            - 3306
+                    jenkins:
+                        puertos:
+                            - 8081
+                            - 30000
+
+        -   name:
+            debug:
+                msg: |
+                        El programa: "{{ item }}" tiene algún puerto jodido!
+            loop: >
+                    {{ estado_puertos.results 
+                        | selectattr("rc", "equalto", 1) 
+                        | map(attribute='item') 
+                        | map('first')  
+                        | map(attribute='key') 
+                        | unique 
+                        | list }}
+                        
+
+        # Vamos a convertir: estado_puertos... 300 lineas de datos... en la lista: ["nginx", "jenkins"]
+        # selectattr: Me filtra de una lista los items que validan una condición
+        # list, convierte algo a una lista... En nuestro caso, forzamos la ejecución del selectattr
+        # map... genera una lista conteniendo el resultado de aplicar una función sobre cada elemento de una lista de entrada
+        # [1,2,3] -> Map (cada elemento x 2) -> [2,4,6]
