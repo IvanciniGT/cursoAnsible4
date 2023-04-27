@@ -1,0 +1,29 @@
+# ssh-keygen -F <IP>.  Ver si tengo un host (IP) dado de alta entre los reconocidos
+# ssh-keyscan -H <IP>. Ese me da las huellas del entorno usando distintos algoritmos de generación de huella:
+# - rsa
+# - ecdsa
+# - ed25519
+# ssh-keygen -R <IP>. Borra las entradas del host (IP) en el known_hosts
+# echo HOLA >> fichero.txt
+
+# Y todo eso lo queremos parametrizar:
+# Quiero un playbook que tenga las variables:
+# generate_finger_print_on_unknown: True
+# regenerate_finger_print_on_changed: False
+# algorythm: ecdsa
+
+-   name:               Asegurar conectividad
+    hosts:              all
+    gather_facts:       false
+    
+    tasks:
+        -   name:       Tarea a ejecutar en el remoto
+            shell:
+                cmd:    echo Eureka
+
+# $ ansible-playbook -i entornos.ini playbook.yaml
+#                    -e VAR=val
+#                    -e @VARFILE
+#                    --tags TAGS
+#                    --skip-tags TAGS
+#                    -i INVENTORY_PATH
