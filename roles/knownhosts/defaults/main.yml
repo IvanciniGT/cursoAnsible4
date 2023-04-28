@@ -1,0 +1,3 @@
+generate_finger_print_on_unknown:   False
+regenerate_finger_print_on_changed: False
+default_finger_print_algorythm:     ecdsa

@@ -1,6 +1,6 @@
 
 -   name:       Dejar nginx listo!
-    include_tasks:  |
+    include_tasks:  |-
                         tasks/distribuciones/{{ ansible_distribution }}/nginx.yaml
     tags:     
               - instalacion

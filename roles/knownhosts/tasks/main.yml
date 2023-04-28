@@ -1,0 +1,110 @@
+-   name:           Saber si ya tengo mi máquina registrada
+    shell:
+        cmd: >-
+                    ssh-keygen -F {{ ansible_host }} 2>/dev/null 
+                    | grep -e ^[^#] 
+                    | sed 's/ /\n/g'
+                    
+    delegate_to:    localhost
+    changed_when:   false
+    register:       antiguo
+    
+-   name:           Procesar salda del comando anterior
+    set_fact:
+        tengo_finger_print_antiguo: "{{ antiguo.stdout_lines | length >= 3 }}" # Devuelve? True | False
+
+-   name:           Procesar salda del comando anterior
+    set_fact:
+        algoritmo_antiguo:          "{{ tengo_finger_print_antiguo and antiguo.stdout_lines[1] or None }}" # condicion and VALOR SI SI or VALOR SI NO
+        finger_print_antiguo:       "{{ tengo_finger_print_antiguo and antiguo.stdout_lines[2] or None }}" # condicion and VALOR SI SI or VALOR SI NO
+    #
+    #   if tengo_finger_print_antiguo:
+    #       algoritmo_antiguo = antiguo.stdout_lines[1]
+    #   else:
+    #       algoritmo_antiguo = None
+    #
+    #   algoritmo_antiguo = antiguo.stdout_lines[1]         if    tengo_finger_print_antiguo else None
+    #                       valor_si_se_cumple_condicion    IF    condicion                  ELSE    valor_si_no_se_cunple
+    #                       condicion && valor_si_se_cumple_condicion || valor_si_no_se_cunple
+    #                       condicion ? valor_si_se_cumple_condicion : valor_si_no_se_cunple
+    
+-   name:           Detener el play si no conozco la máquina y no me piden que le genere finger_print
+    fail:
+        msg:        El entorno no está registrado y no se ha solicitado su inclusión en el known_hosts
+    when:           not tengo_finger_print_antiguo and not generate_finger_print_on_unknown
+
+# Si llego a este punto que significa?
+## O bien, la máquina ya está registrada... no se si con un valor bueno o no... quizás ha cambiado ¿?
+## O bien, la máquina no está registrada y tengo que registrarla
+
+-   name:           Obtener la nueva huella para la máquina
+    shell:
+        cmd: >
+                    ssh-keyscan -H {{ ansible_host }} 2>/dev/null 
+                    | grep {{ tengo_finger_print_antiguo and algoritmo_antiguo or default_finger_print_algorythm }} 
+                    | sed "s/ /\n/g"      
+    delegate_to:    localhost
+    changed_when:   false
+    register:       nuevo
+    # De cara a comparar.... para evr si ha cambiado o no ... que algoritmo necesito? 
+
+-   name:           Procesar salda del comando anterior
+    set_fact:
+        tengo_finger_print_nuevo: "{{ nuevo.stdout_lines | length >= 3 }}" # Devuelve? True | False
+
+-   name:           Procesar salda del comando anterior
+    set_fact:
+        id_nuevo_fingerprint:     "{{ tengo_finger_print_nuevo and nuevo.stdout_lines[0] or None }}" # condicion and VALOR SI SI or VALOR SI NO
+        algoritmo_nuevo:          "{{ tengo_finger_print_nuevo and nuevo.stdout_lines[1] or None }}" # condicion and VALOR SI SI or VALOR SI NO
+        finger_print_nuevo:       "{{ tengo_finger_print_nuevo and nuevo.stdout_lines[2] or None }}" # condicion and VALOR SI SI or VALOR SI NO            
+
+-   name:           Detener el play si no consigo conectar con la máquina actualmente
+    fail:
+        msg:        El entorno no está accesible en este momento
+    when:           not tengo_finger_print_nuevo
+
+-   name:           Detener el play si el entorno ha cambiado y no se ha solicitado la regeneración del fingerprint
+    fail:
+        msg:        El entorno ha cambiado y no se ha solicitado la regeneración del fingerprint
+    when:           tengo_finger_print_antiguo and finger_print_nuevo != finger_print_antiguo and not regenerate_finger_print_on_changed
+
+## Si he llegado a este punto, que significa?
+## O bien, la máquina ya está registrada... no se si con un valor bueno o no... quizás ha cambiado ¿?
+##  Pero si ha cambiado, hay que regenerar... sino... ya me habría pirado!
+## O bien, la máquina no está registrada y tengo que registrarla
+## Solo que además, tengo el fingerprint nuevo        
+
+## AQUI TOCAMOS EL FICHERO KNOWN_HOSTS
+-   name:           Operaciones sobre el fichero Known_hosts
+    when: >           
+                    finger_print_antiguo == None or
+                    finger_print_nuevo != finger_print_antiguo
+    block:
+        -   name:           Asegurarme un backup del known_hosts si lo voy a tocar
+            archive:
+                path:       ~/.ssh/known_hosts
+                dest:       ~/.ssh/known_hosts.backup.tar
+                format:     tar
+            delegate_to:    localhost
+            changed_when:   False
+
+        -   name:           Asegurarme que no queda el finger_print antiguo de la máquina en el known_hosts
+            shell:
+                cmd: >
+                            ssh-keygen -R {{ ansible_host }}
+            delegate_to:    localhost
+            when:           tengo_finger_print_antiguo
+            
+        -   name:           Asegurar que la máquina queda registrada
+            shell:
+                cmd: >
+                            echo '{{id_nuevo_fingerprint}} {{ algoritmo_nuevo }} {{ finger_print_nuevo }}' >> ~/.ssh/known_hosts 
+            delegate_to:    localhost
+            notify:         NUEVA_ENTRADA
+
+    rescue:
+        -   name:           Y si me ha dado error algo? Pa eso he hecho una copia de seguridad
+            unarchive:
+                dest:       ~/.ssh/known_hosts
+                src:       ~/.ssh/known_hosts.backup.tar
+            delegate_to:   localhost

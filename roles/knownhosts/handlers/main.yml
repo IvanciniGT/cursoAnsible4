@@ -1,0 +1,5 @@
+-   name:           Notificar nueva entrada en known_host 
+    debug:
+        msg:        "Fingerprint añadido al known_hosts para el entorno: {{ ansible_host }}"
+    listen:
+                  - NUEVA_ENTRADA

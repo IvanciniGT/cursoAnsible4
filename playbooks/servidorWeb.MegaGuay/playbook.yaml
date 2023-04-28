@@ -7,10 +7,16 @@
             - Ubuntu
             - Fedora
     pre_tasks:
+        -   name:           Asegurar conexión
+            include_role:
+                name:       knownhosts    
+            vars:
+                generate_finger_print_on_unknown:   True
+
         -   name:           Asegurar el entorno de ejecución
             include_tasks:  tasks/asegurar_entorno.yaml
         -   name:           Preparación del entorno
-            include_tasks:  |
+            include_tasks:  |-
                                 tasks/distribuciones/{{ansible_distribution}}/preparar_entorno.yaml
         -   name:           Carga de las variables  #(LAS MIAS, las gordas!)
             include_vars:   vars/vars.yaml

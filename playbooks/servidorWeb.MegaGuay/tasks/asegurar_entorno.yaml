@@ -9,7 +9,7 @@
 -   name:       Asegurar que estamos en un entorno ubuntu
                 # Detengo el PLAY para el host                  
     meta:       end_host
-    when:       ansible_facts.distribution not int distribuciones_validas
+    when:       ansible_facts.distribution not in distribuciones_validas
                 # si la máquina NO ES UBUNTU o FEDURA [sistema_operativo]
     tags:
               - always  # Este es un tag especial de ANSIBLE

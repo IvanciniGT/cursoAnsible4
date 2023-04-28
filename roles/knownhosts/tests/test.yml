@@ -1,0 +1,16 @@
+-   name:               Asegurar conectividad
+    hosts:              all
+    gather_facts:       false
+    
+    tasks:
+      -   name: Ejecutar el role
+          include_role:
+            name: knownhosts    
+          vars:
+            generate_finger_print_on_unknown:   True
+            regenerate_finger_print_on_changed: True
+            default_finger_print_algorythm:     ecdsa
+
+      -   name: Establecer conexion
+          shell:
+            cmd: echo HOLA 

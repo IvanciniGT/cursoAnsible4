@@ -1,0 +1,4 @@
+entorno1 ansible_host=172.19.0.2 ansible_user=root ansible_password=root
+entorno2 ansible_host=172.19.0.3 ansible_user=root ansible_password=root
+entorno3 ansible_host=172.19.0.4 ansible_user=root ansible_password=root
+entorno4 ansible_host=172.19.0.5 ansible_user=root ansible_password=root

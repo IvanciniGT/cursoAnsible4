@@ -41,6 +41,8 @@ nginx:
 ## Ejemplo de uso
 
 ```sh
+# Para identificar la carpeta donde tenemos elrole knownhosts
+export ANSIBLE_ROLES_PATH=/home/ubuntu/environment/curso/roles
 ansible-playbook playbook.yaml -e @default/app1.yaml
 ```
 
