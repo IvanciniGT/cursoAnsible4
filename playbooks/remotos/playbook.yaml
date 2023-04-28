@@ -17,90 +17,126 @@
     gather_facts:       false
     vars:
         generate_finger_print_on_unknown:   True
-        regenerate_finger_print_on_changed: False
+        regenerate_finger_print_on_changed: True
         default_finger_print_algorythm:     ecdsa
     
     tasks:
         -   name:           Saber si ya tengo mi máquina registrada
             shell:
-                cmd: |      
-                            {{ ansible_host }}
-            delegate:       localhost
+                cmd: >-
+                            ssh-keygen -F {{ ansible_host }} 2>/dev/null 
+                            | grep -e ^[^#] 
+                            | sed 's/ /\n/g'
+                            
+            delegate_to:    localhost
             changed_when:   false
             register:       antiguo
             
+        -   name:           Procesar salda del comando anterior
+            set_fact:
+                tengo_finger_print_antiguo: "{{ antiguo.stdout_lines | length >= 3 }}" # Devuelve? True | False
+
+        -   name:           Procesar salda del comando anterior
+            set_fact:
+                algoritmo_antiguo:          "{{ tengo_finger_print_antiguo and antiguo.stdout_lines[1] or None }}" # condicion and VALOR SI SI or VALOR SI NO
+                finger_print_antiguo:       "{{ tengo_finger_print_antiguo and antiguo.stdout_lines[2] or None }}" # condicion and VALOR SI SI or VALOR SI NO
+            #
+            #   if tengo_finger_print_antiguo:
+            #       algoritmo_antiguo = antiguo.stdout_lines[1]
+            #   else:
+            #       algoritmo_antiguo = None
+            #
+            #   algoritmo_antiguo = antiguo.stdout_lines[1]         if    tengo_finger_print_antiguo else None
+            #                       valor_si_se_cumple_condicion    IF    condicion                  ELSE    valor_si_no_se_cunple
+            #                       condicion && valor_si_se_cumple_condicion || valor_si_no_se_cunple
+            #                       condicion ? valor_si_se_cumple_condicion : valor_si_no_se_cunple
+            
         -   name:           Detener el play si no conozco la máquina y no me piden que le genere finger_print
             fail:
-                msg:
-            when:           {{ generate_finger_print_on_unknown }} {{ antiguo }}
-            
+                msg:        El entorno no está registrado y no se ha solicitado su inclusión en el known_hosts
+            when:           not tengo_finger_print_antiguo and not generate_finger_print_on_unknown
 
+        # Si llego a este punto que significa?
+        ## O bien, la máquina ya está registrada... no se si con un valor bueno o no... quizás ha cambiado ¿?
+        ## O bien, la máquina no está registrada y tengo que registrarla
+        
         -   name:           Obtener la nueva huella para la máquina
             shell:
-                cmd: |      
-                            ssh-keyscan -H {{ ansible_host }} {{ finger_print_algorythm | antiguo }}
-            delegate:       localhost
+                cmd: >
+                            ssh-keyscan -H {{ ansible_host }} 2>/dev/null 
+                            | grep {{ tengo_finger_print_antiguo and algoritmo_antiguo or default_finger_print_algorythm }} 
+                            | sed "s/ /\n/g"      
+            delegate_to:    localhost
             changed_when:   false
             register:       nuevo
             # De cara a comparar.... para evr si ha cambiado o no ... que algoritmo necesito? 
-            
-        -   name:           Detener el play si no hay conexión con la máquina
+
+        -   name:           Procesar salda del comando anterior
+            set_fact:
+                tengo_finger_print_nuevo: "{{ nuevo.stdout_lines | length >= 3 }}" # Devuelve? True | False
+
+        -   name:           Procesar salda del comando anterior
+            set_fact:
+                id_nuevo_fingerprint:     "{{ tengo_finger_print_nuevo and nuevo.stdout_lines[0] or None }}" # condicion and VALOR SI SI or VALOR SI NO
+                algoritmo_nuevo:          "{{ tengo_finger_print_nuevo and nuevo.stdout_lines[1] or None }}" # condicion and VALOR SI SI or VALOR SI NO
+                finger_print_nuevo:       "{{ tengo_finger_print_nuevo and nuevo.stdout_lines[2] or None }}" # condicion and VALOR SI SI or VALOR SI NO            
+
+        -   name:           Detener el play si no consigo conectar con la máquina actualmente
             fail:
-                msg:
+                msg:        El entorno no está accesible en este momento
+            when:           not tengo_finger_print_nuevo
+        
+        -   name:           Detener el play si el entorno ha cambiado y no se ha solicitado la regeneración del fingerprint
+            fail:
+                msg:        El entorno ha cambiado y no se ha solicitado la regeneración del fingerprint
+            when:           tengo_finger_print_antiguo and finger_print_nuevo != finger_print_antiguo and not regenerate_finger_print_on_changed
+        
+        ## Si he llegado a este punto, que significa?
+        ## O bien, la máquina ya está registrada... no se si con un valor bueno o no... quizás ha cambiado ¿?
+        ##  Pero si ha cambiado, hay que regenerar... sino... ya me habría pirado!
+        ## O bien, la máquina no está registrada y tengo que registrarla
+        ## Solo que además, tengo el fingerprint nuevo        
         
         ## AQUI TOCAMOS EL FICHERO KNOWN_HOSTS
         -   name:           Operaciones sobre el fichero Known_hosts
+            when: >           
+                            finger_print_antiguo == None or
+                            finger_print_nuevo != finger_print_antiguo
             block:
                 -   name:           Asegurarme un backup del known_hosts si lo voy a tocar
-                    delegate:       localhost
+                    archive:
+                        path:       ~/.ssh/known_hosts
+                        dest:       ~/.ssh/known_hosts.backup.tar
+                        format:     tar
+                    delegate_to:    localhost
+                    changed_when:   False
 
-                -   name:           Asegurarme que no queda finger_print de la máquina anterior 
+                -   name:           Asegurarme que no queda el finger_print antiguo de la máquina en el known_hosts
                     shell:
-                        cmd: |
-                    delegate:       localhost
-                    when:           {{ antiguo }} y {{ nuevo }} {{ regenerate_finger_print_on_changed }}
+                        cmd: >
+                                    ssh-keygen -R {{ ansible_host }}
+                    delegate_to:    localhost
+                    when:           tengo_finger_print_antiguo
                     
                 -   name:           Asegurar que la máquina queda registrada
                     shell:
-                        cmd: |
-                    delegate:       localhost
-                    when:           {{ generate_finger_print_on_unknown }} {{ antiguo }}
+                        cmd: >
+                                    echo '{{id_nuevo_fingerprint}} {{ algoritmo_nuevo }} {{ finger_print_nuevo }}' >> ~/.ssh/known_hosts 
+                    delegate_to:    localhost
                     notify:         NUEVA_ENTRADA
+
             rescue:
                 -   name:           Y si me ha dado error algo? Pa eso he hecho una copia de seguridad
-                    delegate:       localhost
+                    unarchive:
+                        dest:       ~/.ssh/known_hosts
+                        src:       ~/.ssh/known_hosts.backup.tar
+                    delegate_to:   localhost
                     
-            when:            Cuando lo vaya a tocar
 
     handlers:            
         -   name:           Notificar nueva entrada en known_host 
+            debug:
+                msg:        "Fingerprint añadido al known_hosts para el entorno: {{ ansible_host }}"
             listen:
                           - NUEVA_ENTRADA
             
-            
-            
-
-# $ ansible-playbook -i entornos.ini playbook.yaml
-#                    -e VAR=val
-#                    -e @VARFILE
-#                    --tags TAGS
-#                    --skip-tags TAGS
-#                    -i INVENTORY_PATH
-
-
-ALGORITMO QUE ME PIDEN : ssh-rsa
-
-# 172.19.0.3:22 SSH-2.0-OpenSSH_7.6p1 Ubuntu-4
-|1|s3ha6Os0o+HTtMyTDxPV8Suo2co=|TsLmdRD50J8oIUzt9R3KgkAvI0A= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBM8OPjNQMlQ1tIwWHnCYdAYr44KBXU/viuigD5646W4J5rvUC9Kuv0eX2aaVOyPFxhqzZeJftcriA6iQrL/0p9c=
-
-# 172.19.0.3:22 SSH-2.0-OpenSSH_7.6p1 Ubuntu-4
-|1|iRXT4UMyhh31xFLOpDesN3yyiy4=|YBdYgHK/a+kdUler3qWKj7qBops= ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC9NiRfkrMv08eGphrb0Nu1dXrf+8FRTPCjI+FXO5SJM1xj2bDknSMy4ncavZ/0qMWNB5YkGxPIn1DkOm9gYuOy8PGlcL1rLrG+jE1YjGqDy3HrIP3CKkyA5YrZDQut1EvETmlVOK/VW9d6lAC+6qtjk+Npm4IsmaUAlJoG2E9dU2FpCio2eAknGe4ZvCQZrTk49qyrpj5XAOa/TWBgJE/9kktl7amQoqRSoB4RGnnpoKGlpJswqIFmsZhHRgX+nPqIxcGbJ22z8EDjDUDt9z8lY4/UTIPWkjSkyRpwgMJar7baFzuV4IA3yH8Q+sLuEbMP5NWHdIAk8RyMwG7ifUsT
-                                                                     ----------------->
-
-# 172.19.0.3:22 SSH-2.0-OpenSSH_7.6p1 Ubuntu-4
-|1|DDrBB86ENeJUHyG02V+IKOjLWqo=|PH+jseYWHY+XqLBCtCJIQZ6OGTg= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFjDZ9C89nUVGQ1qZzG/X0onkmcju4kWJ2uTLBdIXsy1
-
-
----
-
-|1|QWr4a8qr+wEtiNfX2J0TPwJ26Rg=|H7exG85gths6Fjba8w3EaaTOAVI= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBM8OPjNQMlQ1tIwWHnCYdAYr44KBXU/viuigD5646W4J5rvUC9Kuv0eX2aaVOyPFxhqzZeJftcriA6iQrL/0p9c=
