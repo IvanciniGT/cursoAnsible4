@@ -5,3 +5,13 @@ A saber:
 - 0=Entrada estandar
 - 1=Salida estandar
 - 2=Salida de error
+
+
+## ROLES DE ANSIBLE
+
+Un conjunto de código:
+    - Tareas
+    - Handlers
+    - Variables
+    - ...
+Reutilizables
