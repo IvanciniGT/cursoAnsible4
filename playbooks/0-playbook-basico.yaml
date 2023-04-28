@@ -6,7 +6,7 @@
 
 -   # Nuestro primer play. Un play es un mapa desordenado YAML.
     # Aunque debe llevar una serie de claves que define ANSIBLE
-    hosts:      localhost   # Aquí pondremos los hosts sobre los que vamos a ejecutar las tareas del script
+    hosts:      all         # Aquí pondremos los hosts sobre los que vamos a ejecutar las tareas del script
                             # Realmente en el futuro os diré que esto es mentira !!!!!!!!
     gather_facts:   true    # Por defecto, ANSIBLE, al comenzar la ejecución
                             # de un script ejecuta una tarea llamada GATHER FACTS

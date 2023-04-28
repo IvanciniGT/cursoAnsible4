@@ -100,3 +100,115 @@ Y al ejecutar el playbook, me encuentra automaticamente el ROLE.
 Cualquier cambio de versión en el role, se me actualizaría mediante un git pull en mi proyecto del playbook.
 
 ESTE ES EL CAMINO !!!!
+
+## Git
+
+RAMA: MAIN/MASTER
+        ^ Listo para produccion
+RAMA: Playbook1
+RAMA: Playbook2
+
+Consultar el historial !!!
+
+
+PLAYBOOKS
+    playbook 1  -> REPO 1
+    playbook 2  -> REPO 2 
+    playbook 3  -> REPO 3
+
+JENKINS o similar
+    REPO 1 (playbook1) ---> COMMIT -> RAMA MAIN -> PUSH -> Jenkins en auto lo pase a producción (que se actualice en ansible TOWER en auto)
+    
+    
+# GIT
+
+Es un sistema de control de código fuente: SCM
+Sistema de control de versiones: CVS (Control version system)
+
+CVS -> SUBVERSION  (svn) -> git
+
+De qué van estas herramientas?
+
+- A tener almacenadas distintas versiones del código. -> Y para esto no me vale un Sistema de copias de seguridad?
+- Identificar cambios en las versiones a nivel de LINEA DE CODIGO EN UN FICHERO DE TEXTO
+- Sicronizar el trabajo del equipo de desarrollo
+- Uso de RAMAS !
+
+Una RAMA en un SCM es una linea de evolución paralela en el tiempo de un proyecto
+
+PROYECTO ---> V1.0.0 ---> V1.1.0
+                                ---> V1.1.1
+                                ---> V2.0.0
+
+### COMMIT
+
+En GIT un COMMIT es una copia completa del proyecto en un INSTANTE DEL TIEMPO. Un backup, UNA FOTO (COMPLETA)
+
+Esos commits se asocian a RAMAS.
+
+En todo proyecto tendremos:
+- UNA RAMA PRINCIPAL : main , master.
+    En esta rama: NUNCA SE HACE UN COMMIT EN ESTA RAMA
+                  LO QUE HAY EN ESTA RAMA SE CONSIDERA LISTO PARA PRODUCCION!
+- DESARROLLO: dev, development, desa, desarrollo
+- HABITUALMENTE CREAMOS MAS RAMAS:
+    - Que cada persona abra su propia rama donde trabajar
+    - Para cada funcionalidad abro una rama
+    - Hibrida
+
+# FUSION DE CAMBIOS
+
+Consiste en tomar 2 commits (2 fotos del proyecto), determinar que hay de diferencia entre ellas, y generar una foto nueva con
+una versión que incluya los cambios que se han realizado en una rama y en otra.
+
+Hay distintas estrategias para hacer fusiones de cambios: MERGE, REBASE, CHERRYPICK
+
+# REPO
+
+Es una BBDD, donde se guardan las fotos (commits) del proyecto, asociados a RAMAS.
+
+## Git es un SCM distribuido
+
+No hay un repositorio centralizado de git en un servidor.
+Un proyecto almacenado(gestionado) en git es la suma de muchos repositorios que están distribuidos entre multiples máquinas.
+
+                                                main               C3                            C7
+                                                desarrollo C1, C2, C3 -> C4 -> C5 -> c5 -> C6 -> C7
+                                            REPO proyecto1
+                                            |
+                                    Servidor que permita alojar REPOS de git (github, gitlab, bitbcket)
+                                            |
+    ------------------------------------------------------------------------------- Red
+     |                                                                          |
+     IvanPC                                                                     MenchuPC
+      |- HDD                                                                     |- HDD
+          |- proyecto1                                                               |- proyecto1
+          |     (ficheros)                                                           |      (ficheros)
+          |                                                                          |
+          |- REPO                                                                    |- REPO
+                main                   C3 [v1.0.0]                    C7 [v1.1.0]           main               C3 [v1.0.0]
+                                       ^                              ^                     desarrollo C1, C2, C3 -> C4 -> C5
+                desarrollo (local)  C1 -> C2 -> C3 ->c4 -> c5. C6 -> C7                     menchu             C3 -> C4 -> C5
+                                                             ^
+                desarrollo (remoto) C1, C2, C3 -> C4 -> C5
+                
+    OPERACIONES:
+        - COMMIT:   Hacer una foto en una rama del estado del proyecto (ZIP)
+        - PUSH:     Subir mi rama local a un remoto (En git podemos tener 20 remotos). Por defecto el nombre que se da al primer remoto es: origin
+        - MERGE/REBASE: Operaciones de fusion de cambios
+        - CLONE:    Descargar desde 0 un REPO de git a un local
+        - FETCH:    Descargar una/varias ramas de un remoto a un repo ya existente en local
+        - PULL:     FETCH + FUSION DE CAMBIOS (MERGE, REBASE)
+
+### Ansible Tower / AWX
+
+Herramienta que se instala en un servidor y que nos ofrece:
+- Un entorno gráfico para gestionar inventarios/playbooks
+- Orquestación de playbooks
+- Planificar ejecuciones de playbooks x inventarios
+- Monitorizar ejecuciones x inventarios
+- Gestión de usuario / Asignación de recursos-operaciones sobre los mismos
+- Repositorio centralizado de CREDENCIALES
+- API REST para gestionar/ejecutar playbooks remotamente (integración con otros sistemas)
+- Multitenant: tenencia multiple: App que con 1 unica instalacion permite dar servicio a distintos clientes... 
+- Manteniendo BBDD separadas para ellos, y acceso restringigo a los recursos
