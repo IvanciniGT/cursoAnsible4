@@ -212,3 +212,16 @@ Herramienta que se instala en un servidor y que nos ofrece:
 - API REST para gestionar/ejecutar playbooks remotamente (integración con otros sistemas)
 - Multitenant: tenencia multiple: App que con 1 unica instalacion permite dar servicio a distintos clientes... 
 - Manteniendo BBDD separadas para ellos, y acceso restringigo a los recursos
+
+
+
+PRODUCCION
+DESARROLLO
+INTEGRACION
+
+WEBSERVER
+APPSERVER
+BBDD
+Oracle
+MariaDB
+

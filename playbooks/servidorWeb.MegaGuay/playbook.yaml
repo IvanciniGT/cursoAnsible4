@@ -7,11 +7,11 @@
             - Ubuntu
             - Fedora
     pre_tasks:
-        -   name:           Asegurar conexión
-            include_role:
-                name:       knownhosts    
-            vars:
-                generate_finger_print_on_unknown:   True
+#        -   name:           Asegurar conexión
+#            include_role:
+#                name:       knownhosts    
+#            vars:
+#                generate_finger_print_on_unknown:   True
 
         -   name:           Asegurar el entorno de ejecución
             include_tasks:  tasks/asegurar_entorno.yaml
